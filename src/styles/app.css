@@ -369,6 +369,13 @@ button {
   color: var(--ink-soft);
 }
 
+/* The credit links to the photo's source page without shouting about it. */
+.place__photo figcaption a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
 .place__name {
   margin-top: 0.7rem;
   font-size: 1.3rem;
