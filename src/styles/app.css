@@ -260,6 +260,10 @@ button {
 }
 
 /* The dashed leader line that joins stop 1 to stop 2. */
+.coords--flush {
+  margin-left: 0;
+}
+
 .tunnel {
   margin-left: 0.74rem;
   padding: 0.3rem 0 0.3rem 1.4rem;
@@ -905,6 +909,26 @@ button {
 
 .surface__actions .btn {
   color: var(--ink);
+}
+
+.surface__actions .btn--primary {
+  color: #fff;
+}
+
+/* The starting point's only extra: how to begin the dig. */
+.surface__flick {
+  position: absolute;
+  bottom: 1rem;
+  left: 8.5vw;
+  z-index: 1;
+  padding: 0.25rem 0.9rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ink);
+  background: var(--cream);
+  border-radius: 999px;
+  box-shadow: 0 4px 10px -4px rgb(0 0 0 / 0.6);
+  pointer-events: none;
 }
 
 /* The place name, set off to the left. It keeps to the left 40% of the

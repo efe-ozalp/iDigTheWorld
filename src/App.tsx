@@ -2,15 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Dig, LatLon } from '../shared/types';
 import DigPanel, { type Side } from './components/DigPanel';
 import ErrorBoundary from './components/ErrorBoundary';
-import GlobeView, { type GlobeViewHandle } from './components/GlobeView';
+import GlobeView, { APPROACH_MS, type GlobeViewHandle } from './components/GlobeView';
 import SurfaceView from './components/SurfaceView';
 import DigScene from './components/dig/DigScene';
 import { MOCK_DIGS } from './data/mock';
 import { preloadTopicObjects } from './data/topicObjects';
 import { findCard } from './lib/cards';
 import { loadDestination, type DestinationState } from './lib/destination';
-import { antipode } from './lib/geo';
+import { antipode, formatCoords } from './lib/geo';
 import { lookupPlace, type PlaceLookup } from './lib/place';
+import { useCursorFlick } from './lib/useCursorFlick';
 import { useDigTriggers } from './lib/useDigTriggers';
 import { useMediaQuery } from './lib/useMediaQuery';
 
@@ -20,8 +21,20 @@ interface Selection {
   dig: Dig | null;
 }
 
+/**
+ * What the picked spot is showing:
+ *   approach  the globe is zooming in while the spot is looked up
+ *   page      the spot's own full-screen page, from which the dig starts
+ *   review    back on the globe after a dig, with both ends marked
+ */
+type OriginView = 'approach' | 'page' | 'review';
+
+/** Never hold the zoomed-in globe longer than this waiting for a slow lookup. */
+const APPROACH_LIMIT_MS = 8000;
+
 export default function App() {
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [originView, setOriginView] = useState<OriginView>('approach');
   const [viewing, setViewing] = useState<Side>('origin');
 
   // A dig in progress: the animation and the destination lookup run side by side.
@@ -59,20 +72,38 @@ export default function App() {
       ? looked.found
       : null;
 
-  // The origin card is open whenever a spot is picked. While it is, the globe
-  // stops turning so that a downward flick anywhere can start the dig.
-  const cardOpen = selection !== null && !digging;
+  // The approach: the globe zooms in for a few seconds, then the spot's page
+  // opens once the lookup is in too (or after a limit, with whatever is known).
+  const [zoomDone, setZoomDone] = useState(false);
+  const [waitedEnough, setWaitedEnough] = useState(false);
+  useEffect(() => {
+    if (!selection) return;
+    const zoom = setTimeout(() => setZoomDone(true), reducedMotion ? 400 : APPROACH_MS);
+    const limit = setTimeout(() => setWaitedEnough(true), APPROACH_LIMIT_MS);
+    return () => {
+      clearTimeout(zoom);
+      clearTimeout(limit);
+    };
+  }, [selection, reducedMotion]);
+
+  const approaching = selection !== null && originView === 'approach' && !(zoomDone && (originKnown || waitedEnough));
+  const onOriginPage = selection !== null && !digging && originView !== 'review' && !approaching;
+  const reviewing = selection !== null && !digging && originView === 'review';
   const surfaced = digging && reachedSurface && destination.status === 'ready';
 
-  const dropPin = useCallback((point: LatLon) => {
-    setSelection({ origin: point, dig: null });
+  const select = useCallback((next: Selection) => {
+    setSelection(next);
+    setOriginView('approach');
+    setZoomDone(false);
+    setWaitedEnough(false);
     setViewing('origin');
   }, []);
 
-  const pickSample = useCallback((dig: Dig) => {
-    setSelection({ origin: { lat: dig.origin.lat, lon: dig.origin.lon }, dig });
-    setViewing('origin');
-  }, []);
+  const dropPin = useCallback((point: LatLon) => select({ origin: point, dig: null }), [select]);
+  const pickSample = useCallback(
+    (dig: Dig) => select({ origin: { lat: dig.origin.lat, lon: dig.origin.lon }, dig }),
+    [select],
+  );
 
   const toggleView = useCallback(() => {
     if (!origin || !exit) return;
@@ -101,14 +132,15 @@ export default function App() {
     setDestination({ status: 'idle' });
   }, []);
 
-  /** Back to the globe, turned to show where the tunnel came out. */
+  /** Back to the globe, pulled out and turned to show where the tunnel came out. */
   const showExitOnGlobe = useCallback(() => {
     endDig();
+    setOriginView('review');
     setViewing('exit');
-    if (exit) globeRef.current?.flyTo(exit, 1800);
+    if (exit) globeRef.current?.flyTo(exit, 1800, 2);
   }, [endDig, exit]);
 
-  /** Closes the origin card, which also frees the globe to turn again. */
+  /** Drops the picked spot, which also frees the globe to turn again. */
   const clearSelection = useCallback(() => {
     endDig();
     setSelection(null);
@@ -117,10 +149,16 @@ export default function App() {
 
   const markSurfaceReached = useCallback(() => setReachedSurface(true), []);
 
-  useDigTriggers(cardOpen, startDig);
+  // Ways to start the dig: the down-arrow key or a press-and-drag flick (also
+  // the touch gesture) wherever a spot is ready, and on the spot's own page a
+  // fast downward throw of the cursor with no button held.
+  useDigTriggers(onOriginPage || reviewing, startDig);
+  useCursorFlick(onOriginPage, startDig);
+
+  const covered = digging || onOriginPage;
 
   return (
-    <div className={cardOpen ? 'app app--armed' : 'app'}>
+    <div className={reviewing ? 'app app--armed' : 'app'}>
       <header className="masthead">
         <h1 className="wordmark">
           <i>i</i>DigTheWorld
@@ -129,7 +167,7 @@ export default function App() {
       </header>
 
       <main className="stage">
-        <div className="stage__globe" inert={digging}>
+        <div className="stage__globe" inert={covered}>
           {/* The globe needs WebGL. Without it, say so and leave the sample digs usable. */}
           <ErrorBoundary
             fallback={
@@ -143,32 +181,48 @@ export default function App() {
               ref={globeRef}
               origin={origin}
               exit={exit}
-              locked={cardOpen}
-              paused={digging}
+              locked={approaching || reviewing}
+              paused={covered}
               onPick={dropPin}
             />
-            <p className="hint">
-              {cardOpen
-                ? 'Flick down, press ↓ or hit Dig! to tunnel through'
-                : 'Click anywhere on the globe to set down your explorer'}
+            <p className="hint" role="status">
+              {approaching && origin
+                ? `Zooming in on ${formatCoords(origin)}…`
+                : reviewing
+                  ? 'Flick down, press ↓ or hit Dig! to tunnel through'
+                  : 'Click anywhere on the globe to set down your explorer'}
             </p>
           </ErrorBoundary>
         </div>
 
         <DigPanel
-          origin={origin}
-          exit={exit}
+          origin={reviewing ? origin : null}
+          exit={reviewing ? exit : null}
           originInfo={originInfo}
-          originLoading={origin !== null && !originKnown}
+          originLoading={false}
+          approaching={approaching ? origin : null}
           activeSampleId={sample?.id ?? null}
           sampleDigs={MOCK_DIGS}
           viewing={viewing}
-          hidden={digging}
+          hidden={covered}
           onDig={startDig}
           onPickSample={pickSample}
           onToggleView={toggleView}
           onClose={clearSelection}
         />
+
+        {onOriginPage && origin && (
+          <SurfaceView
+            variant="origin"
+            exit={origin}
+            place={originInfo?.place ?? null}
+            facts={originInfo?.facts ?? []}
+            cards={sample?.cards ?? []}
+            compact={compact}
+            onPrimary={startDig}
+            onDigElsewhere={clearSelection}
+          />
+        )}
 
         {digging && !surfaced && origin && exit && (
           <DigScene
@@ -184,12 +238,13 @@ export default function App() {
 
         {surfaced && exit && (
           <SurfaceView
+            variant="arrival"
             exit={exit}
             place={destination.status === 'ready' ? (destination.found?.place ?? null) : null}
             facts={destination.status === 'ready' ? (destination.found?.facts ?? []) : []}
             cards={sample?.cards ?? []}
             compact={compact}
-            onShowOnGlobe={showExitOnGlobe}
+            onPrimary={showExitOnGlobe}
             onDigElsewhere={clearSelection}
           />
         )}

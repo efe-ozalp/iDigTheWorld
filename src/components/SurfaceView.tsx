@@ -9,8 +9,15 @@ import FieldNotes from './FieldNotes';
 import TopicObject from './TopicObject';
 
 interface Props {
+  /**
+   * 'arrival' is where the tunnel comes out. 'origin' is the starting point,
+   * shown the same way before the dig, with a Dig! button in place of the
+   * way back to the globe.
+   */
+  variant: 'arrival' | 'origin';
+  /** The spot this page is about. */
   exit: LatLon;
-  /** What is at the far end, or null when only the coordinates are known. */
+  /** What is there, or null when only the coordinates are known. */
   place: Place | null;
   /** Short facts about the place, used unless a written overview card supplies its own. */
   facts: readonly string[];
@@ -18,7 +25,9 @@ interface Props {
   cards: readonly TopicCard[];
   /** Phone layout: a field-notes button and a row of small object icons. */
   compact: boolean;
-  onShowOnGlobe: () => void;
+  /** Arrival: turn the globe to this spot. Origin: start digging. */
+  onPrimary: () => void;
+  /** Back to the globe to choose a different spot. */
   onDigElsewhere: () => void;
 }
 
@@ -30,7 +39,8 @@ const isTopic = (value: string): value is Topic => (TOPICS as readonly string[])
  * one cut-out object per topic scattered over the picture. The photo file
  * itself is never altered; everything here is drawn on top of it.
  */
-export default function SurfaceView({ exit, place, facts, cards, compact, onShowOnGlobe, onDigElsewhere }: Props) {
+export default function SurfaceView({ variant, exit, place, facts, cards, compact, onPrimary, onDigElsewhere }: Props) {
+  const isOrigin = variant === 'origin';
   const view = useRef<HTMLElement>(null);
   useEffect(() => {
     view.current?.focus({ preventScroll: true });
@@ -42,6 +52,7 @@ export default function SurfaceView({ exit, place, facts, cards, compact, onShow
 
   const overview = place ? findCard(cards, place.name, []) : undefined;
   const notes = buildFieldNotes({
+    travelled: !isOrigin,
     exit,
     place,
     facts: overview?.facts ?? facts,
@@ -86,16 +97,18 @@ export default function SurfaceView({ exit, place, facts, cards, compact, onShow
       )}
 
       <div className="surface__actions">
-        <button type="button" className="btn" onClick={onShowOnGlobe}>
-          See it on the globe
+        <button type="button" className={isOrigin ? 'btn btn--primary' : 'btn'} onClick={onPrimary}>
+          {isOrigin ? 'Dig!' : 'See it on the globe'}
         </button>
         <button type="button" className="btn" onClick={onDigElsewhere}>
-          Dig somewhere else
+          {isOrigin ? 'Pick another spot' : 'Dig somewhere else'}
         </button>
       </div>
 
       <div className="surface__lead">
-        <p className="surface__eyebrow">{place ? 'You surfaced in' : 'You surfaced at'}</p>
+        <p className="surface__eyebrow">
+          {isOrigin ? (place ? 'You are in' : 'You are at') : place ? 'You surfaced in' : 'You surfaced at'}
+        </p>
         <h2 id="surface-title" className="surface__name">
           {title}
         </h2>
@@ -130,6 +143,8 @@ export default function SurfaceView({ exit, place, facts, cards, compact, onShow
           )}
         </p>
       )}
+
+      {isOrigin && !compact && <p className="surface__flick">Throw your cursor down, fast, to dig</p>}
 
       {place && openTopic && (
         <aside

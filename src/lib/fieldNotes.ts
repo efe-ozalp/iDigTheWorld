@@ -30,6 +30,8 @@ function sourceOf(url: string | undefined): NotesSource | undefined {
 }
 
 interface NotesInput {
+  /** True at the far end of the tunnel; false at the start, where the digging is still ahead. */
+  travelled: boolean;
   exit: LatLon;
   /** What is at the far end, or null when it has not been looked up. */
   place: Place | null;
@@ -43,7 +45,7 @@ interface NotesInput {
  * facts, then the numbers. Every part has a fallback, so the notes are never
  * empty even when nothing has been written about the place.
  */
-export function buildFieldNotes({ exit, place, facts, localTime }: NotesInput): NotesSection[] {
+export function buildFieldNotes({ travelled, exit, place, facts, localTime }: NotesInput): NotesSection[] {
   const sections: NotesSection[] = [];
 
   if (place?.summary) {
@@ -70,7 +72,7 @@ export function buildFieldNotes({ exit, place, facts, localTime }: NotesInput): 
     sections.push({ kind: 'facts', id: 'facts', heading: 'Did you know?', facts });
   }
 
-  const rows = [{ label: 'Distance travelled', value: `${EARTH_DIAMETER_KM.toLocaleString('en-US')} km` }];
+  const rows = [{ label: travelled ? 'Distance travelled' : 'Tunnel ahead', value: `${EARTH_DIAMETER_KM.toLocaleString('en-US')} km` }];
   if (localTime) rows.push({ label: 'Local time', value: localTime });
   rows.push({ label: 'Coordinates', value: formatCoords(exit) });
   sections.push({ kind: 'rows', id: 'numbers', heading: 'By the numbers', rows });

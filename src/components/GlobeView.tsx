@@ -4,8 +4,8 @@ import type { LatLon } from '../../shared/types';
 import { createMarkerElement, type MarkerKind } from './markers';
 
 export interface GlobeViewHandle {
-  /** Swings the camera round until it looks straight down at a point. */
-  flyTo: (point: LatLon, ms?: number) => void;
+  /** Swings the camera round until it looks straight down at a point, optionally changing its height. */
+  flyTo: (point: LatLon, ms?: number, altitude?: number) => void;
 }
 
 interface Props {
@@ -41,6 +41,11 @@ const fadeMarker = (el: HTMLElement, isVisible: boolean) => {
 
 const GLOBE_RADIUS = 100; // globe.gl's fixed scene units
 const FLY_MS = 1100;
+
+/** The slow push in on a newly picked spot, and how close it ends (in globe radii above the surface). */
+export const APPROACH_MS = 3600;
+const APPROACH_ALTITUDE = 0.42;
+const CRUISE_ALTITUDE = 2;
 
 export default function GlobeView({ origin, exit, locked, paused, onPick, ref }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -96,18 +101,19 @@ export default function GlobeView({ origin, exit, locked, paused, onPick, ref }:
     else globe.resumeAnimation();
   }, [hasGlobe, paused]);
 
-  const flyTo = useCallback((point: LatLon, ms = FLY_MS) => {
+  const flyTo = useCallback((point: LatLon, ms = FLY_MS, altitude?: number) => {
     const globe = globeRef.current;
     if (!globe) return;
     globe.controls().autoRotate = false;
-    globe.pointOfView({ lat: point.lat, lng: point.lon }, ms);
+    globe.pointOfView({ lat: point.lat, lng: point.lon, ...(altitude === undefined ? {} : { altitude }) }, ms);
   }, []);
 
   useImperativeHandle(ref, () => ({ flyTo }), [flyTo]);
 
-  // Bring a freshly placed explorer to the centre of the view.
+  // Zoom slowly in on a freshly placed explorer; pull back out when the spot is cleared.
   useEffect(() => {
-    if (origin) flyTo(origin);
+    if (origin) flyTo(origin, APPROACH_MS, APPROACH_ALTITUDE);
+    else globeRef.current?.pointOfView({ altitude: CRUISE_ALTITUDE }, FLY_MS);
   }, [origin, flyTo]);
 
   const markers = useMemo<Marker[]>(

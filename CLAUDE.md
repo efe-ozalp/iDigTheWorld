@@ -40,7 +40,7 @@ For local secrets, copy `.env.example` to `.env.local`.
 ## User flow
 
 1. Globe: spin the Earth, click to drop the explorer.
-2. Origin card: place name, photo, three facts about the starting point.
+2. Origin page: after the click the globe zooms slowly in on the spot while it is looked up, then the spot gets its own full-screen page, identical to the surface view (photo, name, field-notes scroll, topic objects) except that it says "You are in" and has a Dig! button.
 3. Dig: an 8 to 10 second cross-section through crust, mantle, outer core, inner core and back out. Each layer shows a depth counter, temperature and a one-line fact.
 4. Surface: the destination photo fills the whole screen with a slow zoom, and the photo credit sits in a corner. Three things are laid over it:
    - Top left, always visible: a "You surfaced in" line, the huge place name, and the country or region under it. The name keeps to the left 40% of the screen.
@@ -50,7 +50,7 @@ For local secrets, copy `.env.example` to `.env.local`.
 
 Interaction decisions:
 
-- The dig has three triggers: a downward flick, the Dig! button, and the down-arrow key.
+- On the origin page the dig starts when the mouse cursor is thrown quickly downward in the lower half of the screen, with no button pressed (`src/lib/useCursorFlick.ts`). The Dig! button, the down-arrow key and a press-and-drag flick (the touch gesture) also start it.
 - While a pin is down and the origin card is open, globe rotation is locked, so a downward flick anywhere on screen starts the dig. It unlocks when the card closes or a new spot is picked.
 - Start every destination fetch (geocode, photo, AI) the moment the dig begins, so the animation hides the latency.
 - `prefers-reduced-motion` gets a shorter, simpler dig.

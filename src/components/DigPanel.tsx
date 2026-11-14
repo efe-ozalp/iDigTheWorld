@@ -12,6 +12,8 @@ interface Props {
   originInfo: PlaceLookup | null;
   /** True while the starting point is still being looked up. */
   originLoading: boolean;
+  /** The spot the globe is zooming in on, while it is on its way there. */
+  approaching: LatLon | null;
   /** The sample dig the pin came from, if any. */
   activeSampleId: string | null;
   sampleDigs: Dig[];
@@ -32,6 +34,7 @@ export default function DigPanel({
   exit,
   originInfo,
   originLoading,
+  approaching,
   activeSampleId,
   sampleDigs,
   viewing,
@@ -90,6 +93,12 @@ export default function DigPanel({
             </div>
           </div>
         </>
+      ) : approaching ? (
+        <section className="intro" role="status">
+          <h2 className="panel__title">Zooming in…</h2>
+          <p className="coords coords--flush">{formatCoords(approaching)}</p>
+          <p className="panel__lede">Finding out what is at this spot.</p>
+        </section>
       ) : (
         <section className="intro">
           <h2 className="panel__title">Where shall we dig?</h2>
