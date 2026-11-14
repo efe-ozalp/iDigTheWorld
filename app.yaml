@@ -1,0 +1,18 @@
+# Databricks Apps configuration.
+#
+# On every deploy Databricks runs `npm install`, then `npm run build`, then the
+# command below. It injects DATABRICKS_APP_PORT, DATABRICKS_HOST and the app's
+# service principal credentials (DATABRICKS_CLIENT_ID / DATABRICKS_CLIENT_SECRET),
+# so none of those belong in this file. Never put secrets here.
+
+command: ['npm', 'run', 'start']
+
+env:
+  - name: AI_PROVIDER
+    value: 'databricks'
+
+  # The Foundation Model API serving endpoint that writes the topic cards.
+  # The app's service principal needs "Can query" on it: in the app's
+  # Settings > Resources, add it as a Model resource.
+  - name: DATABRICKS_MODEL_ENDPOINT
+    value: 'databricks-llama-4-maverick'
