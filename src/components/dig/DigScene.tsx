@@ -21,7 +21,7 @@ interface Props {
 
 const TUNNEL_KM = 2 * EARTH_RADIUS_KM;
 
-/** In the reduced-motion version the digger jumps from layer to layer at this pace. */
+/** In the reduced-motion version the explorer jumps from layer to layer at this pace. */
 const STEP_SECONDS = 0.5;
 
 /** How long the finished diagram stays up before the arrival takes over the screen. */
@@ -43,7 +43,7 @@ const smoothstep = (from: number, to: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-/** The reduced-motion dig: the digger sits in the middle of one layer at a time. */
+/** The reduced-motion dig: the explorer sits in the middle of one layer at a time. */
 function steppedPoint(elapsed: number): JourneyPoint {
   const leg = LEGS[Math.min(Math.floor(elapsed / STEP_SECONDS), LEGS.length - 1)];
   return journeyAt((leg.start + leg.end) / 2);
@@ -100,7 +100,7 @@ function useDigClock(seconds: number, onDone: () => void) {
   return { elapsed, finished: elapsed >= seconds, skip };
 }
 
-/** The animated cross-section shown while the digger tunnels through the Earth. */
+/** The animated cross-section shown while the explorer tunnels through the Earth. */
 export default function DigScene({
   origin,
   exit,
@@ -115,7 +115,7 @@ export default function DigScene({
   const point = finished ? journeyAt(DIG_SECONDS) : reducedMotion ? steppedPoint(elapsed) : journeyAt(elapsed);
   const reached = point.ascending ? LAYERS.length : point.layer.number;
 
-  // Past the centre "down" becomes "up", so the digger turns over and climbs.
+  // Past the centre "down" becomes "up", so the explorer turns over and climbs.
   const turn = reducedMotion ? (point.position > 0 ? 180 : 0) : 180 * smoothstep(-0.15, 0.15, point.position);
   const wobble = finished || reducedMotion ? 0 : Math.sin(elapsed * Math.PI * 6) * 7;
 

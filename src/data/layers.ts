@@ -129,7 +129,7 @@ export const LEGS: readonly Leg[] = buildLegs();
 /** How long the whole dig takes. */
 export const DIG_SECONDS = LEGS[LEGS.length - 1].end;
 
-/** Where the digger is, and what the instruments read, at one moment of the dig. */
+/** Where the explorer is, and what the instruments read, at one moment of the dig. */
 export interface JourneyPoint {
   legIndex: number;
   layer: Layer;

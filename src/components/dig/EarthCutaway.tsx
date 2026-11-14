@@ -1,6 +1,7 @@
 import { memo } from 'react';
-import { DIGGER_FIGURE, FLAG } from '../../art/sprites';
 import { LAYERS, type Layer, type LayerId } from '../../data/layers';
+import ExitFlag from '../ExitFlag';
+import Explorer from '../Explorer';
 
 /**
  * The cutaway diagram: the Earth sliced through its centre, the tunnel down
@@ -105,9 +106,9 @@ function Leader({ layer, lit }: { layer: Layer; lit: boolean }) {
 }
 
 interface Props {
-  /** Where the digger is: -1 at the starting surface, 0 at the centre, 1 at the exit. */
+  /** Where the explorer is: -1 at the starting surface, 0 at the centre, 1 at the exit. */
   position: number;
-  /** How far the digger has turned over, in degrees: 0 heading down, 180 once it is climbing. */
+  /** How far the explorer has turned over, in degrees: 0 heading down, 180 once it is climbing. */
   turn: number;
   /** A small rocking motion while digging, in degrees. */
   wobble: number;
@@ -145,7 +146,7 @@ export default function EarthCutaway({
     >
       <Base />
 
-      {/* Layers the digger has not reached yet are washed out; each clears as it arrives. */}
+      {/* Layers the explorer has not reached yet are washed out; each clears as it arrives. */}
       {LAYERS.map((layer) => (
         <circle
           key={layer.id}
@@ -180,18 +181,16 @@ export default function EarthCutaway({
 
       {/* The far side's flag. It is flipped top to bottom, because over there "up" points this way. */}
       {arrived && (
-        <g
-          transform={`translate(${cx + 42} ${cy + r}) scale(0.8 -0.8) translate(-9 -53)`}
-          dangerouslySetInnerHTML={{ __html: FLAG }}
-        />
+        <g transform={`translate(${cx + 42} ${cy + r}) scale(0.8 -0.8) translate(-9 -53)`}>
+          <ExitFlag />
+        </g>
       )}
 
-      <g className="cutaway__digger" transform={`translate(${cx} ${y})`}>
+      <g className="cutaway__explorer" transform={`translate(${cx} ${y})`}>
         <circle className="cutaway__lamp" r="25" />
-        <g
-          transform={`rotate(${turn + wobble}) scale(0.72) translate(-24 -34)`}
-          dangerouslySetInnerHTML={{ __html: DIGGER_FIGURE }}
-        />
+        <g transform={`rotate(${turn + wobble}) scale(0.72) translate(-24 -34)`}>
+          <Explorer />
+        </g>
       </g>
     </svg>
   );

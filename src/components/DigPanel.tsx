@@ -75,7 +75,7 @@ export default function DigPanel({
             </div>
             <div className="actions">
               <button type="button" className="btn" onClick={onToggleView}>
-                {viewing === 'origin' ? 'See the other side' : 'Back to my digger'}
+                {viewing === 'origin' ? 'See the other side' : 'Back to my explorer'}
               </button>
               <button type="button" className="btn" onClick={onClose}>
                 Pick another spot
@@ -87,7 +87,7 @@ export default function DigPanel({
         <section className="intro">
           <h2 className="panel__title">Where shall we dig?</h2>
           <p className="panel__lede">
-            Spin the globe, then click any spot to set your digger down. A yellow flag marks the place where a tunnel
+            Spin the globe, then click any spot to set your explorer down. A yellow flag marks the place where a tunnel
             straight through the centre of the Earth would come out.
           </p>
         </section>

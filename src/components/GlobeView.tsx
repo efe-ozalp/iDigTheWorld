@@ -9,7 +9,7 @@ export interface GlobeViewHandle {
 }
 
 interface Props {
-  /** Where the digger stands, or null before a spot is picked. */
+  /** Where the explorer stands, or null before a spot is picked. */
   origin: LatLon | null;
   /** The antipode of origin, marked with a flag. */
   exit: LatLon | null;
@@ -105,13 +105,13 @@ export default function GlobeView({ origin, exit, locked, paused, onPick, ref }:
 
   useImperativeHandle(ref, () => ({ flyTo }), [flyTo]);
 
-  // Bring a freshly placed digger to the centre of the view.
+  // Bring a freshly placed explorer to the centre of the view.
   useEffect(() => {
     if (origin) flyTo(origin);
   }, [origin, flyTo]);
 
   const markers = useMemo<Marker[]>(
-    () => (origin && exit ? [{ ...origin, kind: 'digger' }, { ...exit, kind: 'flag' }] : []),
+    () => (origin && exit ? [{ ...origin, kind: 'explorer' }, { ...exit, kind: 'flag' }] : []),
     [origin, exit],
   );
 

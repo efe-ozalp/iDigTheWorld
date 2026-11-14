@@ -125,7 +125,7 @@ export default function App() {
             <p className="hint">
               {cardOpen
                 ? 'Flick down, press ↓ or hit Dig! to tunnel through'
-                : 'Click anywhere on the globe to set down your digger'}
+                : 'Click anywhere on the globe to set down your explorer'}
             </p>
           </ErrorBoundary>
         </div>

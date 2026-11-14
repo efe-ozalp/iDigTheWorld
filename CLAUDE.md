@@ -1,6 +1,6 @@
 # iDigTheWorld
 
-A hackathon web app. The user spins a 3D Earth, drops a digger on any spot, digs straight through the planet and surfaces at the exact antipode. The app teaches them about both ends of the tunnel, then offers AI-written topic cards (food, culture, history, nature, language) they can keep digging into.
+A hackathon web app. The user spins a 3D Earth, drops an explorer on any spot, digs straight through the planet and surfaces at the exact antipode. The app teaches them about both ends of the tunnel, then offers AI-written topic cards (food, culture, history, nature, language) they can keep digging into.
 
 This file records the team's decisions. Follow them. When a decision changes, update this file in the same commit.
 
@@ -39,7 +39,7 @@ For local secrets, copy `.env.example` to `.env.local`.
 
 ## User flow
 
-1. Globe: spin the Earth, click to drop the digger.
+1. Globe: spin the Earth, click to drop the explorer.
 2. Origin card: place name, photo, three facts about the starting point.
 3. Dig: an 8 to 10 second cross-section through crust, mantle, outer core, inner core and back out. Each layer shows a depth counter, temperature and a one-line fact.
 4. Surface: the destination photo fills the whole screen, with the page laid over it like an encyclopedia spread: a huge place name set off to the left, facts as numbered callouts with leader lines, distance travelled (about 12,742 km) and live local time on small placards, the photo credit in a corner, and the topic tabs along the bottom edge.
@@ -99,6 +99,7 @@ Think 1990s DK Eyewitness books and Encarta CD-ROMs: optimistic, wonder-driven, 
 - The dig screen is a textbook cutaway diagram with numbered callouts.
 - Light CD-ROM chrome: beveled buttons and an encyclopedia-style index tab strip.
 - No dark mode, no glassmorphism, no gradients-on-everything modern SaaS look.
+- The little figure is called the explorer, in copy, code and commit messages alike. Its component is `Explorer`.
 
 ## Layout
 

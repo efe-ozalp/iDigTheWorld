@@ -164,7 +164,7 @@ button {
 
 /* --anchor: distance from the artwork's left edge to the point that touches the
    ground. --foot: empty space below that point in the drawing. */
-.marker--digger {
+.marker--explorer {
   --anchor: 24px;
   --foot: 4px;
 }
@@ -595,7 +595,7 @@ button {
   fill: var(--ink);
 }
 
-.cutaway__digger {
+.cutaway__explorer {
   filter: drop-shadow(0 3px 3px rgb(0 0 0 / 0.35));
 }
 
