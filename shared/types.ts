@@ -62,3 +62,16 @@ export interface Dig {
   destination: Place;
   cards: TopicCard[];
 }
+
+/** What /api/geocode answers: the named place at a coordinate, if there is one. */
+export interface GeocodeResult {
+  /** False for open water and anywhere else the geocoder has no name for. */
+  found: boolean;
+  /** The town, district or region. */
+  name: string;
+  /** The wider region, such as a state or province. */
+  region: string;
+  country: string;
+  /** English Wikipedia article title, when OpenStreetMap links one. */
+  wikipediaTitle?: string;
+}
