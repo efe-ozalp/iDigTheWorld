@@ -20,3 +20,12 @@ export function formatCoords({ lat, lon }: LatLon, digits = 2): string {
   const eastWest = lon >= 0 ? 'E' : 'W';
   return `${Math.abs(lat).toFixed(digits)}° ${northSouth}, ${Math.abs(lon).toFixed(digits)}° ${eastWest}`;
 }
+
+/** Great-circle distance between two points, in km. */
+export function distanceKm(a: LatLon, b: LatLon): number {
+  const rad = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * rad;
+  const dLon = (b.lon - a.lon) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2;
+  return (EARTH_DIAMETER_KM / 2) * 2 * Math.asin(Math.min(1, Math.sqrt(h)));
+}

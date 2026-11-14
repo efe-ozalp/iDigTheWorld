@@ -62,7 +62,7 @@ export function buildFieldNotes({ exit, place, facts, localTime }: NotesInput): 
       heading: 'About this spot',
       text: place
         ? 'Nobody has written this place up yet, so the numbers below are all the notes there are.'
-        : 'Names, photos and facts for the far side arrive with live data in phase 3. The sample digs show a complete arrival.',
+        : 'Nothing could be looked up for this spot, so the numbers below are all the notes there are.',
     });
   }
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Dig, LatLon } from '../shared/types';
 import DigPanel, { type Side } from './components/DigPanel';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -7,8 +7,10 @@ import SurfaceView from './components/SurfaceView';
 import DigScene from './components/dig/DigScene';
 import { MOCK_DIGS } from './data/mock';
 import { preloadTopicObjects } from './data/topicObjects';
+import { findCard } from './lib/cards';
 import { loadDestination, type DestinationState } from './lib/destination';
 import { antipode } from './lib/geo';
+import { lookupPlace, type PlaceLookup } from './lib/place';
 import { useDigTriggers } from './lib/useDigTriggers';
 import { useMediaQuery } from './lib/useMediaQuery';
 
@@ -35,6 +37,27 @@ export default function App() {
 
   const origin = selection?.origin ?? null;
   const exit = useMemo(() => (origin ? antipode(origin) : null), [origin]);
+
+  // A spot picked by hand is looked up as soon as the pin lands. Prepared digs carry their own data.
+  const [looked, setLooked] = useState<{ at: LatLon; found: PlaceLookup | null } | null>(null);
+  useEffect(() => {
+    if (!selection || selection.dig) return;
+    let current = true;
+    void lookupPlace(selection.origin).then((found) => {
+      if (current) setLooked({ at: selection.origin, found });
+    });
+    return () => {
+      current = false;
+    };
+  }, [selection]);
+
+  const sample = selection?.dig ?? null;
+  const originKnown = sample !== null || looked?.at === origin;
+  const originInfo: PlaceLookup | null = sample
+    ? { place: sample.origin, facts: [...(findCard(sample.cards, sample.origin.name, [])?.facts ?? [])] }
+    : looked?.at === origin
+      ? looked.found
+      : null;
 
   // The origin card is open whenever a spot is picked. While it is, the globe
   // stops turning so that a downward flick anywhere can start the dig.
@@ -66,8 +89,8 @@ export default function App() {
     setDestination({ status: 'loading' });
     // Start the lookup and the picture downloads now, so the animation covers the wait.
     preloadTopicObjects();
-    void loadDestination(exit, selection.dig).then((place) => {
-      if (digRun.current === run) setDestination({ status: 'ready', place });
+    void loadDestination(exit, selection.dig).then((found) => {
+      if (digRun.current === run) setDestination({ status: 'ready', found });
     });
   }, [selection, exit, digging]);
 
@@ -135,7 +158,9 @@ export default function App() {
         <DigPanel
           origin={origin}
           exit={exit}
-          dig={selection?.dig ?? null}
+          originInfo={originInfo}
+          originLoading={origin !== null && !originKnown}
+          activeSampleId={sample?.id ?? null}
           sampleDigs={MOCK_DIGS}
           viewing={viewing}
           hidden={digging}
@@ -149,7 +174,7 @@ export default function App() {
           <DigScene
             origin={origin}
             exit={exit}
-            originName={selection?.dig?.origin.name}
+            originName={originInfo?.place.name}
             destination={destination}
             reducedMotion={reducedMotion}
             compact={compact}
@@ -160,8 +185,9 @@ export default function App() {
         {surfaced && exit && (
           <SurfaceView
             exit={exit}
-            place={destination.status === 'ready' ? destination.place : null}
-            cards={selection?.dig?.cards ?? []}
+            place={destination.status === 'ready' ? (destination.found?.place ?? null) : null}
+            facts={destination.status === 'ready' ? (destination.found?.facts ?? []) : []}
+            cards={sample?.cards ?? []}
             compact={compact}
             onShowOnGlobe={showExitOnGlobe}
             onDigElsewhere={clearSelection}

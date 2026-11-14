@@ -12,7 +12,9 @@ interface Props {
   exit: LatLon;
   /** What is at the far end, or null when only the coordinates are known. */
   place: Place | null;
-  /** Cards already written for this trip; the place's overview supplies the facts. */
+  /** Short facts about the place, used unless a written overview card supplies its own. */
+  facts: readonly string[];
+  /** Cards already written for this trip. */
   cards: readonly TopicCard[];
   /** Phone layout: a field-notes button and a row of small object icons. */
   compact: boolean;
@@ -28,7 +30,7 @@ const isTopic = (value: string): value is Topic => (TOPICS as readonly string[])
  * one cut-out object per topic scattered over the picture. The photo file
  * itself is never altered; everything here is drawn on top of it.
  */
-export default function SurfaceView({ exit, place, cards, compact, onShowOnGlobe, onDigElsewhere }: Props) {
+export default function SurfaceView({ exit, place, facts, cards, compact, onShowOnGlobe, onDigElsewhere }: Props) {
   const view = useRef<HTMLElement>(null);
   useEffect(() => {
     view.current?.focus({ preventScroll: true });
@@ -42,7 +44,7 @@ export default function SurfaceView({ exit, place, cards, compact, onShowOnGlobe
   const notes = buildFieldNotes({
     exit,
     place,
-    facts: overview?.facts ?? [],
+    facts: overview?.facts ?? facts,
     localTime: useLocalClock(place),
   });
 

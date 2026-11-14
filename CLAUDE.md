@@ -31,7 +31,7 @@ For local secrets, copy `.env.example` to `.env.local`.
 
 1. Done. Scaffold, shared types, mock data, globe, pin drop, antipode.
 2. Done. Dig animation and its three triggers; Node server, `app.yaml` and `/api/health` for Databricks.
-3. Real data: geocoding, ocean detection, photo lookup with fallbacks, surface screen, origin card.
+3. Done. Real data: geocoding, ocean detection, photo lookup with fallbacks, surface screen, origin card. `src/lib/place.ts` looks a coordinate up and never rejects. Still to come from this list: Wikivoyage text (wanted as AI grounding, so it moves to phase 4) and bundled fallback photos for land (a land place with no photo shows the plain paper page; open water falls back to one bundled ocean photo).
 4. AI: card endpoint, prompt, validation, caching, and recursive cards opened from the topic objects.
 5. Ocean arrival screen with details about the body of water, and "Swim to nearest land".
 6. Full styling pass to the design direction below.
@@ -63,6 +63,8 @@ Interaction decisions:
 - Antipode: latitude is negated; longitude gets 180 added and is wrapped to the range -180 to 180.
 - Shared data shapes live in `shared/types.ts` (`Place`, `TopicCard`, `Dig`). `Place` carries an IANA `timeZone`, and the UI renders the local clock live from it.
 - Reverse geocoding: `/api/geocode` calls Nominatim with a User-Agent (contact from `NOMINATIM_CONTACT`) and caches results by rounded latitude and longitude so we stay under 1 request per second. If it fails or times out, the browser falls back to BigDataCloud's free client endpoint.
+- Until the AI cards exist, a place's summary is the opening of its Wikipedia article and its facts are the sentences that follow.
+- Time zones come from the `tz-lookup` package on land and from nautical time (one hour per 15° of longitude) at sea.
 - Photos, in order: Wikimedia Commons geosearch by coordinates, then the Wikipedia page image for the place, then a small bundled set of ocean and region fallback images.
 - Photo credits: photos fetched live may carry any Commons licence. Always show the credit: the author and licence name, linked to the Commons file page, in a small italic caption.
 - Text may be laid over photos. Never edit or crop the image file itself; `object-fit` only changes how it is framed on screen.

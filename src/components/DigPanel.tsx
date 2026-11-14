@@ -1,6 +1,6 @@
 import type { Dig, LatLon } from '../../shared/types';
-import { findCard } from '../lib/cards';
 import { EARTH_DIAMETER_KM, formatCoords } from '../lib/geo';
+import type { PlaceLookup } from '../lib/place';
 import PlaceCard from './PlaceCard';
 
 export type Side = 'origin' | 'exit';
@@ -8,8 +8,12 @@ export type Side = 'origin' | 'exit';
 interface Props {
   origin: LatLon | null;
   exit: LatLon | null;
-  /** The prepared dig the pin came from, or null for a free click on the globe. */
-  dig: Dig | null;
+  /** What is known about the starting point, once it has been looked up. */
+  originInfo: PlaceLookup | null;
+  /** True while the starting point is still being looked up. */
+  originLoading: boolean;
+  /** The sample dig the pin came from, if any. */
+  activeSampleId: string | null;
   sampleDigs: Dig[];
   /** Which end of the tunnel the globe is currently turned toward. */
   viewing: Side;
@@ -26,7 +30,9 @@ interface Props {
 export default function DigPanel({
   origin,
   exit,
-  dig,
+  originInfo,
+  originLoading,
+  activeSampleId,
   sampleDigs,
   viewing,
   hidden,
@@ -44,12 +50,13 @@ export default function DigPanel({
               <span className="callout">1</span> You start here
             </h2>
             <p className="coords">{formatCoords(origin)}</p>
-            {dig ? (
-              <PlaceCard place={dig.origin} facts={findCard(dig.cards, dig.origin.name, [])?.facts} />
+            {originInfo ? (
+              <PlaceCard place={originInfo.place} facts={originInfo.facts} />
             ) : (
-              <p className="note note--inset">
-                Names, photos and facts for any spot you pick arrive with live data in phase 3. The sample digs below
-                show a complete trip.
+              <p className="note note--inset" role="status">
+                {originLoading
+                  ? 'Looking up this spot…'
+                  : 'Nothing could be looked up for this spot, but you can still dig from it.'}
               </p>
             )}
           </section>
@@ -101,7 +108,7 @@ export default function DigPanel({
               <button
                 type="button"
                 className="btn sample"
-                aria-pressed={dig?.id === sample.id}
+                aria-pressed={activeSampleId === sample.id}
                 onClick={() => onPickSample(sample)}
               >
                 <span>
