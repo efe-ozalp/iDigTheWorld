@@ -32,7 +32,7 @@ For local secrets, copy `.env.example` to `.env.local`.
 1. Done. Scaffold, shared types, mock data, globe, pin drop, antipode.
 2. Done. Dig animation and its three triggers; Node server, `app.yaml` and `/api/health` for Databricks.
 3. Real data: geocoding, ocean detection, photo lookup with fallbacks, surface screen, origin card.
-4. AI: card endpoint, prompt, validation, caching, topic tiles, recursive cards.
+4. AI: card endpoint, prompt, validation, caching, and recursive cards opened from the topic objects.
 5. Ocean arrival screen with details about the body of water, and "Swim to nearest land".
 6. Full styling pass to the design direction below.
 7. Demo hardening: a "Featured digs" row with pre-cached results that work with no network (Spain to New Zealand, Argentina to China, Indonesia to Colombia, Madison to the Indian Ocean).
@@ -42,8 +42,11 @@ For local secrets, copy `.env.example` to `.env.local`.
 1. Globe: spin the Earth, click to drop the explorer.
 2. Origin card: place name, photo, three facts about the starting point.
 3. Dig: an 8 to 10 second cross-section through crust, mantle, outer core, inner core and back out. Each layer shows a depth counter, temperature and a one-line fact.
-4. Surface: the destination photo fills the whole screen, with the page laid over it like an encyclopedia spread: a huge place name set off to the left, facts as numbered callouts with leader lines, distance travelled (about 12,742 km) and live local time on small placards, the photo credit in a corner, and the topic tabs along the bottom edge.
-5. Dig deeper: topic tiles. Each opens an AI-written card offering 2 or 3 sub-topics, which open further cards. Depth is capped at 5 with a "you've hit bedrock" ending.
+4. Surface: the destination photo fills the whole screen with a slow zoom, and the photo credit sits in a corner. Three things are laid over it:
+   - Top left, always visible: a "You surfaced in" line, the huge place name, and the country or region under it. The name keeps to the left 40% of the screen.
+   - A rolled parchment scroll at the left edge, below the name. It unrolls sideways on hover, and a click, tap, Enter or Space pins it open; a second click or Escape closes it. Inside are the field notes: the place summary with a "Source" line, the facts, then distance travelled (about 12,742 km), live local time and coordinates as labelled rows. The notes are a list of sections built in `src/lib/fieldNotes.ts`, with a fallback when nothing has been written about the place.
+   - One cut-out object per topic, scattered at fixed positions and slightly tilted, each with a handwritten label. On land: cuisine, culture, history and biosphere (a horse). On open water: only biosphere (a fish). They never cover the name or the scroll. There is no tab strip and no text printed directly on the photo.
+5. Dig deeper: clicking a topic object opens that topic's AI-written card next to it. Each card offers 2 or 3 sub-topics, which open further cards. Depth is capped at 5 with a "you've hit bedrock" ending.
 
 Interaction decisions:
 
@@ -95,6 +98,7 @@ Think 1990s DK Eyewitness books and Encarta CD-ROMs: optimistic, wonder-driven, 
 
 - White or pale cream backgrounds with generous whitespace.
 - Cut-out objects with soft drop shadows (globe, compass, fossil, trowel) that overlap the text slightly. Draw them as SVG, one component each, so real photos can be swapped in later.
+- The topic objects on the surface view are the team's own cut-out PNGs in `public/objects/`, with transparent backgrounds. Use them exactly as supplied and never edit the files. Give them shadows with CSS `filter: drop-shadow`, which follows the outline, not `box-shadow`. Their positions are in `src/data/topicObjects.ts`.
 - Classic serif for headings and body. Small italic captions joined to objects by thin leader lines.
 - Saturated primary accents, with one colour per topic: cuisine red, history ochre, biosphere green, culture blue. The tokens are in `src/styles/tokens.css`.
 - The dig screen is a textbook cutaway diagram with numbered callouts.
@@ -112,7 +116,7 @@ server.js   production server for Databricks Apps
 app.yaml    Databricks Apps configuration
 shared/     types.ts, imported by both the client and the server
 src/        the React app: components/, lib/, data/, styles/
-public/     Earth textures and bundled photos
+public/     Earth textures, bundled photos, and the topic objects (objects/)
 ```
 
 ## Things that have bitten us

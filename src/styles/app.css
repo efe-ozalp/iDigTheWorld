@@ -828,8 +828,9 @@ button {
 
 /* ---------- Surface view ---------- */
 
-/* The arrival: the destination photo fills the screen and the page is laid
-   over it. The photo file is never altered; scrims and plates sit on top. */
+/* The arrival: the destination photo fills the screen, with the place name,
+   the field-notes scroll and the topic objects laid over it. The photo file
+   is never altered; scrims and plates sit on top. */
 .surface {
   --cream: #fffdf7;
   --shade: 20 14 6; /* warm near-black, used at varying strengths for scrims */
@@ -881,13 +882,13 @@ button {
   }
 }
 
-/* Soft scrims at the top and bottom edges, where the buttons, credit and tabs sit. */
+/* Soft scrims at the top and bottom edges, where the buttons and the credit sit. */
 .surface__scrim {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(to top, rgb(var(--shade) / 0.74), rgb(var(--shade) / 0) 27%),
+    linear-gradient(to top, rgb(var(--shade) / 0.6), rgb(var(--shade) / 0) 20%),
     linear-gradient(to bottom, rgb(var(--shade) / 0.42), rgb(var(--shade) / 0) 20%);
 }
 
@@ -895,7 +896,7 @@ button {
   position: absolute;
   top: 1.1rem;
   right: 1.2rem;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -906,24 +907,25 @@ button {
   color: var(--ink);
 }
 
-/* The name and placards, set off to the left rather than centred. */
+/* The place name, set off to the left. It keeps to the left 40% of the
+   screen, which the topic objects stay out of. */
 .surface__lead {
   position: absolute;
   top: 8.5vh;
   left: var(--gutter);
   z-index: 1;
-  max-width: 58vw;
+  max-width: 40vw;
 }
 
 /* Its own scrim: a soft dark band that always reaches past the end of the name. */
 .surface__lead::before {
   content: '';
   position: absolute;
-  inset: -14vh -20vw -6vh calc(-1 * var(--gutter) - 2vw);
+  inset: -14vh -16vw -7vh calc(-1 * var(--gutter) - 2vw);
   z-index: -1;
-  background: linear-gradient(90deg, rgb(var(--shade) / 0.76) 0%, rgb(var(--shade) / 0.7) 78%, rgb(var(--shade) / 0) 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
+  background: linear-gradient(90deg, rgb(var(--shade) / 0.7) 0%, rgb(var(--shade) / 0.62) 72%, rgb(var(--shade) / 0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 68%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 68%, transparent 100%);
   pointer-events: none;
 }
 
@@ -939,7 +941,7 @@ button {
 .surface__name {
   margin: 0.1em 0 0.12em -0.03em;
   /* As big as fits: capped by the screen, and shrunk as the name gets longer. */
-  font-size: clamp(2.6rem, min(11vw, 112vw / var(--name-length)), 12rem);
+  font-size: clamp(2.6rem, min(11vw, 76vw / var(--name-length)), 12rem);
   line-height: 0.95;
   letter-spacing: -0.02em;
   text-wrap: balance;
@@ -962,114 +964,12 @@ button {
   background: currentColor;
 }
 
-/* Museum placards: small labelled tags for the numbers. */
-.placards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-  margin: 1.6rem 0 0;
-}
-
-.placard {
-  padding: 0.4rem 0.85rem 0.45rem;
-  color: var(--ink);
-  background: var(--cream);
-  /* A fine inner rule, like the printed border on a label. */
-  box-shadow:
-    inset 0 0 0 3px var(--cream),
-    inset 0 0 0 4px #b7ab8d,
-    0 6px 14px -6px rgb(0 0 0 / 0.55);
-}
-
-.placard dt {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.placard dd {
-  margin: 0;
-  font-size: 1.08rem;
-  font-weight: 700;
-  font-variant-numeric: lining-nums tabular-nums;
-  line-height: 1.25;
-}
-
-.surface__note {
-  max-width: 30rem;
-  margin-top: 1.4rem;
-  padding: 0.6rem 0.8rem;
-  font-size: 0.92rem;
-  font-style: italic;
-  color: var(--ink);
-  background: var(--cream);
-  border-left: 3px solid var(--sun);
-}
-
-/* Fact callouts: a numbered marker on the photo, a leader line, and a caption plate. */
-.surface__leaders {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.surface__leader {
-  stroke: var(--cream);
-  stroke-width: 1.3;
-  vector-effect: non-scaling-stroke;
-}
-
-/* A darker line underneath keeps the leader visible on pale photos. */
-.surface__leader--edge {
-  stroke: rgb(var(--shade) / 0.7);
-  stroke-width: 3.4;
-}
-
-.surface__facts {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.fact__marker {
-  position: absolute;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 1.55rem;
-  height: 1.55rem;
-  margin: -0.775rem 0 0 -0.775rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--ink);
-  background: var(--cream);
-  border: 2px solid var(--red);
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.55);
-}
-
-.fact__plate {
-  position: absolute;
-  padding: 0.65rem 0.85rem 0.7rem;
-  font-size: 0.98rem;
-  font-style: italic;
-  line-height: 1.38;
-  color: var(--ink);
-  background: var(--cream);
-  box-shadow: 0 10px 18px -8px rgb(0 0 0 / 0.6);
-}
-
 .surface__credit {
   position: absolute;
   right: 1.2rem;
-  bottom: 4rem;
+  bottom: 1rem;
   z-index: 1;
-  max-width: min(30rem, 46vw);
+  max-width: min(30rem, 33vw);
   padding: 0.2rem 0.55rem;
   font-size: 0.74rem;
   font-style: italic;
@@ -1084,85 +984,341 @@ button {
   text-underline-offset: 2px;
 }
 
-/* Index tabs along the bottom edge, one colour per topic. */
-.tabs {
+/* ---------- Field notes: the parchment scroll ---------- */
+
+/* Rolled up it is two rods side by side at the left edge. Opening it lets the
+   paper between them out to its full width, pushing the far rod to the right. */
+.scroll {
+  --scroll-width: min(27rem, 33vw);
+  --rod: 2.1rem;
+  --paper-ink: #2a1e0f;
+  --paper-brown: #6b4a1c;
   position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 3;
+  top: 37.5vh;
+  left: -0.3rem;
+  z-index: 4;
   display: flex;
-  align-items: flex-end;
-  gap: 0.3rem;
-  padding: 0 var(--gutter);
-  /* The edge of the page the tabs stick up from. */
-  border-bottom: 7px solid var(--cream);
+  height: 59vh;
+  color: var(--paper-ink);
+  /* On the whole scroll, so the shadow follows the rods and the paper together. */
+  filter: drop-shadow(0 14px 12px rgb(0 0 0 / 0.5));
 }
 
-.tabs__label {
-  align-self: center;
-  margin-right: 0.9rem;
+/* A rod with the paper wound round it. The shading across it makes it read as round. */
+.scroll__roll {
+  position: relative;
+  flex: none;
+  width: var(--rod);
+  background: linear-gradient(90deg, #8d7446 0%, #cdb685 14%, #f3e8c6 40%, #e9dbb0 62%, #b89f6c 86%, #806a40 100%);
+  border-radius: 0.3rem;
+}
+
+/* The rolled ends: rings of paper seen end-on. */
+.scroll__roll::before,
+.scroll__roll::after {
+  content: '';
+  position: absolute;
+  right: -0.14rem;
+  left: -0.14rem;
+  height: 1rem;
+  background: radial-gradient(
+    ellipse at center,
+    #6a5230 0 15%,
+    #d9c594 16% 36%,
+    #9c8352 37% 50%,
+    #efe2b8 51% 72%,
+    #a48b5a 73% 100%
+  );
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(70 48 18 / 0.55);
+}
+
+.scroll__roll::before {
+  top: -0.5rem;
+}
+
+.scroll__roll::after {
+  bottom: -0.5rem;
+}
+
+/* The near rod is the handle: it is the button that opens and closes the scroll. */
+.scroll__handle {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  border: 0;
+  cursor: pointer;
+}
+
+.scroll__handle:focus-visible {
+  outline: 3px solid var(--cream);
+  outline-offset: 4px;
+}
+
+.scroll__tag {
   font-size: 0.8rem;
+  font-style: italic;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  color: #4a3413;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+/* A ribbon ties the rolled scroll shut and slips off as it opens. */
+.scroll__ribbon {
+  position: absolute;
+  top: 13%;
+  left: 0;
+  width: calc(var(--rod) * 2);
+  height: 0.6rem;
+  background: var(--red);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.scroll__ribbon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.15rem;
+  height: 1.15rem;
+  background: radial-gradient(circle at 40% 35%, #e25c50, #a31f17 70%);
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+  transform: translate(-50%, -50%);
+}
+
+.scroll.is-open .scroll__ribbon {
+  opacity: 0;
+}
+
+/* Aged paper: uneven warm patches, fine speckle, and edges darkened by handling. */
+.scroll__paper {
+  width: 0;
+  margin-block: 0.55rem;
+  overflow: hidden;
+  background-color: #ead9ad;
+  background-image:
+    radial-gradient(ellipse at 18% 12%, rgb(255 245 208 / 0.75), transparent 55%),
+    radial-gradient(ellipse at 88% 82%, rgb(190 152 88 / 0.45), transparent 52%),
+    radial-gradient(ellipse at 62% 38%, rgb(214 184 122 / 0.35), transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.25  0 0 0 0 0.1  0 0 0 0.24 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  box-shadow:
+    inset 0 0 26px rgb(120 84 30 / 0.5),
+    inset 0 0 3px rgb(90 60 20 / 0.7);
+  transition: width 0.55s cubic-bezier(0.3, 0.85, 0.3, 1);
+}
+
+.scroll.is-open .scroll__paper {
+  width: var(--scroll-width);
+}
+
+/* The page keeps its full width while the paper around it opens, so the text
+   is uncovered rather than reflowed. */
+.scroll__page {
+  width: var(--scroll-width);
+  height: 100%;
+  padding: 0.8rem 1.3rem 1.6rem;
+  overflow-y: auto;
+  /* Longer notes scroll inside the page; the fade at the foot hints at more below. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent);
+}
+
+/* What is written on the scroll (and on the phone's sheet). */
+.notes__title {
+  padding-bottom: 0.3rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-align: center;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgb(74 52 19 / 0.45);
+}
+
+.notes__section {
+  margin-top: 0.6rem;
+}
+
+.notes__heading {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--paper-brown, #6b4a1c);
+}
+
+.notes__summary {
+  margin-top: 0.1rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* A drop capital, as at the start of an encyclopedia entry. */
+.notes__summary::first-letter {
+  float: left;
+  margin: 0.06em 0.08em 0 0;
+  font-size: 2.85em;
+  font-weight: 700;
+  line-height: 0.8;
+  color: var(--red);
+}
+
+.notes__source {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--paper-brown, #6b4a1c);
+}
+
+.notes__source a {
+  color: inherit;
+}
+
+.notes__facts {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notes__facts li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.notes__marker {
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  margin-top: 0.08rem;
+  font-size: 0.76rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  background: rgb(255 253 247 / 0.7);
+  border: 1.5px solid var(--red);
+  border-radius: 50%;
+}
+
+/* Label, dotted leader, value: like the entries in a table of contents. */
+.notes__rows {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0.2rem 0 0;
+}
+
+.notes__rows div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.notes__rows dt {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   white-space: nowrap;
-  text-shadow: 0 1px 3px rgb(0 0 0 / 0.8);
+  color: var(--paper-brown, #6b4a1c);
 }
 
-.tab {
-  padding: 0.5rem 1.25rem 0.45rem;
-  font-size: 0.95rem;
+.notes__rows dt::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px dotted rgb(74 52 19 / 0.65);
+}
+
+.notes__rows dd {
+  margin: 0;
+  font-size: 0.93rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--tab-ink, #fff);
-  background: var(--tab);
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------- Topic objects ---------- */
+
+/* Cut-out pictures scattered over the photo, one per topic. The shadow is a
+   drop-shadow filter so that it follows the outline of the cut-out. */
+.object {
+  position: absolute;
+  z-index: 2;
+  padding: 0;
+  background: none;
   border: 0;
-  border-top: 2px solid rgb(255 255 255 / 0.45);
-  border-radius: 9px 9px 0 0;
-  box-shadow: 0 -3px 10px -3px rgb(0 0 0 / 0.5);
   cursor: pointer;
-  transition: padding 0.15s;
+  filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.5));
+  transform: rotate(var(--tilt, 0deg));
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
 
-.tab:hover,
-.tab[aria-expanded='true'] {
-  padding-bottom: 0.85rem;
+.object img {
+  display: block;
+  width: 100%;
+  height: auto;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
-.tab:focus-visible {
+/* Picked up off the page: a slight lift and a longer shadow. */
+.object:hover,
+.object:focus-visible,
+.object[aria-expanded='true'] {
+  filter: drop-shadow(0 24px 16px rgb(0 0 0 / 0.55));
+  transform: translateY(-0.5rem) rotate(var(--tilt, 0deg)) scale(1.04);
+}
+
+.object:focus-visible {
   outline: 3px solid var(--cream);
-  outline-offset: 2px;
+  outline-offset: 0.4rem;
 }
 
-.tab--cuisine {
-  --tab: var(--cuisine);
+/* A scrap of paper with the topic written on it by hand. */
+.object__label {
+  position: absolute;
+  padding: 0.05rem 0.65rem 0.2rem;
+  font-family: var(--hand);
+  font-size: 1.12rem;
+  font-style: italic;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--cream);
+  /* Undo the object's tilt, then lean the other way a little. */
+  transform: rotate(calc(-1 * var(--tilt, 0deg) - 3deg));
 }
 
-.tab--culture {
-  --tab: var(--culture);
+/* Shown in an object's place if its picture cannot be loaded. */
+.object-fallback {
+  position: absolute;
+  z-index: 2;
+  color: var(--ink);
 }
 
-/* Ochre is too pale for white lettering. */
-.tab--history {
-  --tab: var(--history);
-  --tab-ink: var(--ink);
-}
-
-.tab--biosphere {
-  --tab: var(--biosphere);
-}
-
-
-/* The card a tab opens, standing on the tab strip. */
+/* The card a topic opens, placed next to its object. */
 .topic-plate {
   --tab: var(--ink);
   position: absolute;
-  bottom: 3.4rem;
-  left: var(--gutter);
-  z-index: 4;
-  width: min(34rem, 88vw);
-  max-height: 70vh;
+  z-index: 5;
+  width: min(30rem, 35vw);
+  max-height: 62vh;
   overflow-y: auto;
   padding: 1rem 1.2rem 1.1rem;
   color: var(--ink);
@@ -1186,7 +1342,6 @@ button {
 .topic-plate--biosphere {
   --tab: var(--biosphere);
 }
-
 
 .topic-plate__close {
   float: right;
@@ -1222,17 +1377,17 @@ button {
 
 .surface--plain .surface__eyebrow,
 .surface--plain .surface__where,
-.surface--plain .surface__name,
-.surface--plain .tabs__label {
+.surface--plain .surface__name {
   text-shadow: none;
 }
 
-/* Narrow screens: the photo stays behind while the page scrolls over it as
-   one column, so no caption can land on another. */
+/* Narrow screens: the photo stays behind while the page scrolls over it as one
+   column. The scroll becomes a button that opens a sheet, and the objects
+   become a row of small icons along the bottom. */
 .surface--compact {
   --gutter: 1.1rem;
   overflow-y: auto;
-  padding-bottom: 4.5rem;
+  padding-bottom: 7.5rem;
 }
 
 .surface--compact .surface__backdrop {
@@ -1268,24 +1423,10 @@ button {
   font-size: clamp(2.4rem, min(17vw, 150vw / var(--name-length)), 5rem);
 }
 
-.surface--compact .surface__facts {
+.notes-button {
   position: relative;
-  display: grid;
-  gap: 1.2rem;
-  padding: 2rem var(--gutter) 0 calc(var(--gutter) + 0.7rem);
-}
-
-.surface--compact .fact {
-  position: relative;
-}
-
-.surface--compact .fact__marker {
-  top: 0;
-  left: 0;
-}
-
-.surface--compact .fact__plate {
-  position: static;
+  margin: 1.4rem var(--gutter) 0;
+  color: var(--ink);
 }
 
 .surface--compact .surface__credit {
@@ -1293,22 +1434,62 @@ button {
   text-align: left;
 }
 
-.surface--compact .tabs {
+.sheet {
+  --paper-brown: #6b4a1c;
   position: fixed;
-  overflow-x: auto;
+  inset: auto 0 0;
+  z-index: 8;
+  max-height: 82dvh;
+  padding: 1rem 1.2rem 1.5rem;
+  overflow-y: auto;
+  color: #2a1e0f;
+  background: #ead9ad;
+  box-shadow:
+    inset 0 0 26px rgb(120 84 30 / 0.45),
+    0 -10px 30px rgb(0 0 0 / 0.55);
 }
 
-.surface--compact .tabs__label {
-  display: none;
+.sheet__close {
+  float: right;
 }
 
-.surface--compact .tab {
-  padding-inline: 0.8rem;
+.surface--compact .objects {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 3;
+  display: flex;
+  justify-content: space-around;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem 0.55rem;
+  background: rgb(var(--shade) / 0.62);
+}
+
+.surface--compact .object,
+.surface--compact .object-fallback {
+  position: relative;
+  width: 4.3rem;
+  transform: none;
+}
+
+.surface--compact .object-fallback {
+  width: auto;
+}
+
+.surface--compact .object__label {
+  position: static;
+  display: block;
+  margin-top: 0.25rem;
+  padding: 0 0.3rem 0.1rem;
+  font-size: 0.85rem;
+  text-align: center;
+  transform: none;
 }
 
 .surface--compact .topic-plate {
   position: fixed;
   right: var(--gutter);
+  bottom: 7.2rem;
+  left: var(--gutter);
   width: auto;
 }
 
@@ -1318,7 +1499,10 @@ button {
     animation: none;
   }
 
-  .tab {
+  /* No unrolling: the scroll is simply shown or hidden. */
+  .scroll__paper,
+  .scroll__ribbon,
+  .object {
     transition: none;
   }
 }

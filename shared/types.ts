@@ -19,6 +19,8 @@ export interface Place extends LatLon {
   /** The ocean or sea, set when isOcean is true. */
   oceanName?: string;
   summary: string;
+  /** The page the summary was taken from, such as a Wikipedia article. Shown as its source. */
+  summaryUrl?: string;
   photoUrl: string;
   /** Who made the photo and under what licence, e.g. "Photo: A. Author, CC BY-SA 4.0". Always shown with the photo. */
   photoCredit: string;

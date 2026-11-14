@@ -6,6 +6,7 @@ import GlobeView, { type GlobeViewHandle } from './components/GlobeView';
 import SurfaceView from './components/SurfaceView';
 import DigScene from './components/dig/DigScene';
 import { MOCK_DIGS } from './data/mock';
+import { preloadTopicObjects } from './data/topicObjects';
 import { loadDestination, type DestinationState } from './lib/destination';
 import { antipode } from './lib/geo';
 import { useDigTriggers } from './lib/useDigTriggers';
@@ -63,7 +64,8 @@ export default function App() {
     setDigging(true);
     setReachedSurface(false);
     setDestination({ status: 'loading' });
-    // Start the lookup now so the animation covers the wait.
+    // Start the lookup and the picture downloads now, so the animation covers the wait.
+    preloadTopicObjects();
     void loadDestination(exit, selection.dig).then((place) => {
       if (digRun.current === run) setDestination({ status: 'ready', place });
     });

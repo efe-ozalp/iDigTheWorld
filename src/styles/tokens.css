@@ -28,6 +28,8 @@
   --culture: var(--blue);
 
   --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', 'URW Palladio L', Georgia, serif;
+  /* For the short handwritten labels beside the topic objects. */
+  --hand: 'Bradley Hand', 'Segoe Print', 'Ink Free', 'Noteworthy', cursive;
 
   /* The soft shadow under cut-out photographs and objects */
   --shadow-cutout: 0 12px 16px -8px rgb(54 40 12 / 0.4);

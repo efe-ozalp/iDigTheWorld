@@ -35,6 +35,7 @@ const MADRID_TO_WEBER: Dig = {
     isOcean: false,
     summary:
       'Madrid is the capital and largest city of Spain. It lies on the River Manzanares in the centre of the Iberian Peninsula, about 660 metres above sea level, and is the political, economic and cultural centre of the country.',
+    summaryUrl: 'https://en.wikipedia.org/wiki/Madrid',
     photoUrl: '/photos/madrid.jpg',
     photoCredit: 'The Madrid skyline. Photo: Zarateman, CC0, via Wikimedia Commons.',
     photoPageUrl:
@@ -46,6 +47,7 @@ const MADRID_TO_WEBER: Dig = {
     isOcean: false,
     summary:
       'Weber is a village 28 km south-east of Dannevirke and 23 km west-northwest of Herbertville, on the east coast of New Zealand’s North Island. It is named after the German-born surveyor Charles H. Weber.',
+    summaryUrl: 'https://en.wikipedia.org/wiki/Weber,_New_Zealand',
     photoUrl: '/photos/waihi-falls.jpg',
     photoCredit: 'Waihi Falls, in the hills near Weber. Photo: Pseudopanax, public domain, via Wikimedia Commons.',
     photoPageUrl: 'https://commons.wikimedia.org/wiki/File:Waihi_Falls_from_lookout.jpg',
@@ -105,6 +107,7 @@ const MADISON_TO_INDIAN_OCEAN: Dig = {
     isOcean: false,
     summary:
       'Madison is the capital of the U.S. state of Wisconsin and its second-most populous city. Its downtown sits on an isthmus between Lakes Mendota and Monona. Founded in 1836, it is named after President James Madison.',
+    summaryUrl: 'https://en.wikipedia.org/wiki/Madison,_Wisconsin',
     photoUrl: '/photos/madison.jpg',
     photoCredit: 'Downtown Madison on its isthmus. Photo: Wikideas1, CC0, via Wikimedia Commons.',
     photoPageUrl: 'https://commons.wikimedia.org/wiki/File:Madison,_Wisconsin_skyline.jpg',
@@ -119,6 +122,7 @@ const MADISON_TO_INDIAN_OCEAN: Dig = {
     oceanName: 'Indian Ocean',
     summary:
       'The Indian Ocean is the third-largest of the world’s five oceanic divisions, covering about 20% of the water on Earth’s surface. It is bounded by Asia to the north, Africa to the west and Australia to the east.',
+    summaryUrl: 'https://en.wikipedia.org/wiki/Indian_Ocean',
     photoUrl: '/photos/indian-ocean.jpg',
     photoCredit:
       'The Indian Ocean seen from the International Space Station. Photo: NASA, public domain, via Wikimedia Commons.',

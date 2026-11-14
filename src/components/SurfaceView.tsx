@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { TOPICS, type LatLon, type Place, type Topic, type TopicCard } from '../../shared/types';
+import { TOPIC_OBJECTS, topicObjectImage } from '../data/topicObjects';
 import { findCard } from '../lib/cards';
-import { EARTH_DIAMETER_KM, formatCoords } from '../lib/geo';
+import { buildFieldNotes } from '../lib/fieldNotes';
+import { formatCoords } from '../lib/geo';
 import { useLocalClock } from '../lib/useLocalClock';
+import FieldNotes from './FieldNotes';
+import TopicObject from './TopicObject';
 
 interface Props {
   exit: LatLon;
@@ -10,36 +14,19 @@ interface Props {
   place: Place | null;
   /** Cards already written for this trip; the place's overview supplies the facts. */
   cards: readonly TopicCard[];
-  /** Stack the captions in a column instead of spreading them over the photo. */
+  /** Phone layout: a field-notes button and a row of small object icons. */
   compact: boolean;
   onShowOnGlobe: () => void;
   onDigElsewhere: () => void;
 }
 
-const TOPIC_LABEL: Record<Topic, string> = {
-  cuisine: 'Cuisine',
-  culture: 'Culture',
-  history: 'History',
-  biosphere: 'Biosphere',
-};
-
 const isTopic = (value: string): value is Topic => (TOPICS as readonly string[]).includes(value);
 
 /**
- * Where each fact sits on a wide screen, in percent of the view: the numbered
- * marker on the photo, the caption plate, and which top corner of the plate
- * the leader line runs to.
- */
-const CALLOUTS = [
-  { marker: { x: 60, y: 42 }, plate: { x: 70, y: 19, width: 24 }, corner: 'left' },
-  { marker: { x: 62, y: 67 }, plate: { x: 71, y: 52, width: 23 }, corner: 'left' },
-  { marker: { x: 37, y: 63 }, plate: { x: 5.5, y: 69, width: 23 }, corner: 'right' },
-] as const;
-
-/**
- * The arrival: the destination's photo fills the screen and the page is laid
- * over it like a spread in an illustrated encyclopedia. The photo file itself
- * is never altered; everything here is drawn on top of it.
+ * The arrival. The destination's photo fills the screen, with the place name
+ * at the top left, the field notes rolled up in a scroll at the left edge, and
+ * one cut-out object per topic scattered over the picture. The photo file
+ * itself is never altered; everything here is drawn on top of it.
  */
 export default function SurfaceView({ exit, place, cards, compact, onShowOnGlobe, onDigElsewhere }: Props) {
   const view = useRef<HTMLElement>(null);
@@ -52,9 +39,14 @@ export default function SurfaceView({ exit, place, cards, compact, onShowOnGlobe
   const photo = place?.photoUrl && failedUrl !== place.photoUrl ? place.photoUrl : null;
 
   const overview = place ? findCard(cards, place.name, []) : undefined;
-  const facts = (overview?.facts ?? []).slice(0, CALLOUTS.length);
+  const notes = buildFieldNotes({
+    exit,
+    place,
+    facts: overview?.facts ?? [],
+    localTime: useLocalClock(place),
+  });
 
-  // Open water has no cuisine or culture to explore, so it offers only what its overview lists.
+  // Land offers all four topics. Open water has no cuisine, culture or history, only its biosphere.
   const topics: readonly Topic[] = !place
     ? []
     : place.isOcean
@@ -72,9 +64,7 @@ export default function SurfaceView({ exit, place, cards, compact, onShowOnGlobe
   }, [openTopic]);
   const openCard = place && openTopic ? findCard(cards, place.name, [openTopic]) : undefined;
 
-  const clock = useLocalClock(place);
-  const coords = formatCoords(exit);
-  const title = place?.name ?? coords;
+  const title = place?.name ?? formatCoords(exit);
   const classes = ['surface', compact && 'surface--compact', !photo && 'surface--plain'].filter(Boolean).join(' ');
 
   return (
@@ -108,69 +98,23 @@ export default function SurfaceView({ exit, place, cards, compact, onShowOnGlobe
           {title}
         </h2>
         {place && <p className="surface__where">{place.isOcean ? 'Open ocean' : place.country}</p>}
-
-        <dl className="placards">
-          <div className="placard">
-            <dt>Distance travelled</dt>
-            <dd>{EARTH_DIAMETER_KM.toLocaleString('en-US')} km</dd>
-          </div>
-          {clock && (
-            <div className="placard">
-              <dt>Local time</dt>
-              <dd>{clock}</dd>
-            </div>
-          )}
-          {place && (
-            <div className="placard">
-              <dt>Coordinates</dt>
-              <dd>{coords}</dd>
-            </div>
-          )}
-        </dl>
-
-        {!place && (
-          <p className="surface__note">
-            Names, photos and facts for the far side arrive with live data in phase 3. The sample digs show a complete
-            arrival.
-          </p>
-        )}
       </div>
 
-      {facts.length > 0 && !compact && (
-        <svg className="surface__leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          {facts.map((fact, i) => {
-            const { marker, plate, corner } = CALLOUTS[i];
-            const end = corner === 'left' ? plate.x : plate.x + plate.width;
-            const line = { x1: marker.x, y1: marker.y, x2: end, y2: plate.y };
-            return (
-              <g key={fact}>
-                <line className="surface__leader surface__leader--edge" {...line} />
-                <line className="surface__leader" {...line} />
-              </g>
-            );
-          })}
-        </svg>
-      )}
+      <FieldNotes sections={notes} compact={compact} />
 
-      {facts.length > 0 && (
-        <ol className="surface__facts">
-          {facts.map((fact, i) => {
-            const { marker, plate } = CALLOUTS[i];
-            return (
-              <li key={fact} className="fact">
-                <span className="fact__marker" style={compact ? undefined : { left: `${marker.x}%`, top: `${marker.y}%` }}>
-                  {i + 1}
-                </span>
-                <p
-                  className="fact__plate"
-                  style={compact ? undefined : { left: `${plate.x}%`, top: `${plate.y}%`, width: `${plate.width}%` }}
-                >
-                  {fact}
-                </p>
-              </li>
-            );
-          })}
-        </ol>
+      {place && topics.length > 0 && (
+        <div className="objects">
+          {topics.map((topic) => (
+            <TopicObject
+              key={topic}
+              object={TOPIC_OBJECTS[topic]}
+              image={topicObjectImage(topic, place.isOcean)}
+              open={openTopic === topic}
+              compact={compact}
+              onToggle={() => setOpenTopic(openTopic === topic ? null : topic)}
+            />
+          ))}
+        </div>
       )}
 
       {place && photo && (
@@ -186,11 +130,15 @@ export default function SurfaceView({ exit, place, cards, compact, onShowOnGlobe
       )}
 
       {place && openTopic && (
-        <aside className={`topic-plate topic-plate--${openTopic}`} aria-label={`${TOPIC_LABEL[openTopic]} card`}>
+        <aside
+          className={`topic-plate topic-plate--${openTopic}`}
+          style={compact ? undefined : TOPIC_OBJECTS[openTopic].cardPosition}
+          aria-label={`${TOPIC_OBJECTS[openTopic].name} card`}
+        >
           <button type="button" className="btn btn--small topic-plate__close" onClick={() => setOpenTopic(null)}>
             Close
           </button>
-          <p className="eyebrow">{TOPIC_LABEL[openTopic]}</p>
+          <p className="eyebrow">{TOPIC_OBJECTS[openTopic].name}</p>
           {openCard ? (
             <>
               <h3 className="topic-plate__title">{openCard.title}</h3>
@@ -204,28 +152,11 @@ export default function SurfaceView({ exit, place, cards, compact, onShowOnGlobe
             </>
           ) : (
             <p className="topic-plate__hook">
-              Cards about {TOPIC_LABEL[openTopic].toLowerCase()} in {place.name} are written by the AI, which arrives
-              in phase 4.
+              Cards about {TOPIC_OBJECTS[openTopic].label} in {place.name} are written by the AI, which arrives in
+              phase 4.
             </p>
           )}
         </aside>
-      )}
-
-      {topics.length > 0 && (
-        <nav className="tabs" aria-label="Dig deeper">
-          <span className="tabs__label">Dig deeper</span>
-          {topics.map((topic) => (
-            <button
-              key={topic}
-              type="button"
-              className={`tab tab--${topic}`}
-              aria-expanded={openTopic === topic}
-              onClick={() => setOpenTopic(openTopic === topic ? null : topic)}
-            >
-              {TOPIC_LABEL[topic]}
-            </button>
-          ))}
-        </nav>
       )}
     </section>
   );
