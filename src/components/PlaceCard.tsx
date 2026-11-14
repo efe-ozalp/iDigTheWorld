@@ -1,17 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Place } from '../../shared/types';
-import { localTimeIn } from '../lib/time';
+import { useLocalClock } from '../lib/useLocalClock';
 
 interface Props {
   place: Place;
   /** Short facts about the place, shown as a numbered list. */
   facts?: readonly string[];
-  /** Set to false when the surrounding screen already shows the name as its heading. */
-  showName?: boolean;
 }
 
 /** Photo, name, local time and summary for one end of a dig. */
-export default function PlaceCard({ place, facts, showName = true }: Props) {
+export default function PlaceCard({ place, facts }: Props) {
   const clock = useLocalClock(place);
   // Remember which URL failed rather than a flag, so a new place gets a fresh try.
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
@@ -25,10 +23,20 @@ export default function PlaceCard({ place, facts, showName = true }: Props) {
         ) : (
           <img src={place.photoUrl} alt={place.name} onError={() => setFailedUrl(place.photoUrl)} />
         )}
-        {!photoMissing && <figcaption>{place.photoCredit}</figcaption>}
+        {!photoMissing && (
+          <figcaption>
+            {place.photoPageUrl ? (
+              <a href={place.photoPageUrl} target="_blank" rel="noreferrer">
+                {place.photoCredit}
+              </a>
+            ) : (
+              place.photoCredit
+            )}
+          </figcaption>
+        )}
       </figure>
 
-      {showName && <h3 className="place__name">{place.name}</h3>}
+      <h3 className="place__name">{place.name}</h3>
       <p className="place__meta">
         <span className={`tag ${place.isOcean ? 'tag--ocean' : 'tag--land'}`}>
           {place.isOcean ? 'Open ocean' : 'Dry land'}
@@ -47,14 +55,4 @@ export default function PlaceCard({ place, facts, showName = true }: Props) {
       )}
     </article>
   );
-}
-
-/** The time at the place right now, refreshed while the card is on screen. */
-function useLocalClock(place: Place): string {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 20_000);
-    return () => clearInterval(timer);
-  }, []);
-  return (place.timeZone && localTimeIn(place.timeZone, now)) || place.localTime;
 }

@@ -37,6 +37,8 @@ const MADRID_TO_WEBER: Dig = {
       'Madrid is the capital and largest city of Spain. It lies on the River Manzanares in the centre of the Iberian Peninsula, about 660 metres above sea level, and is the political, economic and cultural centre of the country.',
     photoUrl: '/photos/madrid.jpg',
     photoCredit: 'The Madrid skyline. Photo: Zarateman, CC0, via Wikimedia Commons.',
+    photoPageUrl:
+      'https://commons.wikimedia.org/wiki/File:Madrid_-_Sky_Bar_360%C2%BA_(Hotel_Riu_Plaza_Espa%C3%B1a),_vistas_19.jpg',
   }),
   destination: place(antipode(MADRID), 'Pacific/Auckland', {
     name: 'Weber',
@@ -46,6 +48,7 @@ const MADRID_TO_WEBER: Dig = {
       'Weber is a village 28 km south-east of Dannevirke and 23 km west-northwest of Herbertville, on the east coast of New Zealand’s North Island. It is named after the German-born surveyor Charles H. Weber.',
     photoUrl: '/photos/waihi-falls.jpg',
     photoCredit: 'Waihi Falls, in the hills near Weber. Photo: Pseudopanax, public domain, via Wikimedia Commons.',
+    photoPageUrl: 'https://commons.wikimedia.org/wiki/File:Waihi_Falls_from_lookout.jpg',
   }),
   cards: [
     card('Madrid', [], {
@@ -104,6 +107,7 @@ const MADISON_TO_INDIAN_OCEAN: Dig = {
       'Madison is the capital of the U.S. state of Wisconsin and its second-most populous city. Its downtown sits on an isthmus between Lakes Mendota and Monona. Founded in 1836, it is named after President James Madison.',
     photoUrl: '/photos/madison.jpg',
     photoCredit: 'Downtown Madison on its isthmus. Photo: Wikideas1, CC0, via Wikimedia Commons.',
+    photoPageUrl: 'https://commons.wikimedia.org/wiki/File:Madison,_Wisconsin_skyline.jpg',
   }),
   // The open sea has no civil time zone. Ships keep nautical time, one hour per
   // 15° of longitude, which puts 90.6° E at UTC+6. IANA spells that
@@ -118,6 +122,7 @@ const MADISON_TO_INDIAN_OCEAN: Dig = {
     photoUrl: '/photos/indian-ocean.jpg',
     photoCredit:
       'The Indian Ocean seen from the International Space Station. Photo: NASA, public domain, via Wikimedia Commons.',
+    photoPageUrl: 'https://commons.wikimedia.org/wiki/File:ISS006-E-44031_-_View_of_the_Indian_Ocean.jpg',
   }),
   cards: [
     card('Madison', [], {

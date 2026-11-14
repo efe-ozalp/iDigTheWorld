@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Dig, LatLon } from '../shared/types';
-import ArrivalCard from './components/ArrivalCard';
 import DigPanel, { type Side } from './components/DigPanel';
 import ErrorBoundary from './components/ErrorBoundary';
 import GlobeView, { type GlobeViewHandle } from './components/GlobeView';
+import SurfaceView from './components/SurfaceView';
 import DigScene from './components/dig/DigScene';
 import { MOCK_DIGS } from './data/mock';
 import { loadDestination, type DestinationState } from './lib/destination';
@@ -143,25 +143,27 @@ export default function App() {
           onClose={clearSelection}
         />
 
-        {digging && origin && exit && (
+        {digging && !surfaced && origin && exit && (
           <DigScene
             origin={origin}
             exit={exit}
             originName={selection?.dig?.origin.name}
-            exitName={destination.status === 'ready' ? destination.place?.name : undefined}
             destination={destination}
             reducedMotion={reducedMotion}
             compact={compact}
-            surfaced={surfaced}
             onReachSurface={markSurfaceReached}
-          >
-            <ArrivalCard
-              exit={exit}
-              place={destination.status === 'ready' ? destination.place : null}
-              onShowOnGlobe={showExitOnGlobe}
-              onDigElsewhere={clearSelection}
-            />
-          </DigScene>
+          />
+        )}
+
+        {surfaced && exit && (
+          <SurfaceView
+            exit={exit}
+            place={destination.status === 'ready' ? destination.place : null}
+            cards={selection?.dig?.cards ?? []}
+            compact={compact}
+            onShowOnGlobe={showExitOnGlobe}
+            onDigElsewhere={clearSelection}
+          />
         )}
       </main>
     </div>

@@ -42,7 +42,7 @@ For local secrets, copy `.env.example` to `.env.local`.
 1. Globe: spin the Earth, click to drop the digger.
 2. Origin card: place name, photo, three facts about the starting point.
 3. Dig: an 8 to 10 second cross-section through crust, mantle, outer core, inner core and back out. Each layer shows a depth counter, temperature and a one-line fact.
-4. Surface: full-bleed photo of the destination, place name, distance travelled (about 12,742 km), local time.
+4. Surface: the destination photo fills the whole screen, with the page laid over it like an encyclopedia spread: a huge place name set off to the left, facts as numbered callouts with leader lines, distance travelled (about 12,742 km) and live local time on small placards, the photo credit in a corner, and the topic tabs along the bottom edge.
 5. Dig deeper: topic tiles. Each opens an AI-written card offering 2 or 3 sub-topics, which open further cards. Depth is capped at 5 with a "you've hit bedrock" ending.
 
 Interaction decisions:
@@ -61,7 +61,8 @@ Interaction decisions:
 - Shared data shapes live in `shared/types.ts` (`Place`, `TopicCard`, `Dig`). `Place` carries an IANA `timeZone`, and the UI renders the local clock live from it.
 - Reverse geocoding: `/api/geocode` calls Nominatim with a User-Agent (contact from `NOMINATIM_CONTACT`) and caches results by rounded latitude and longitude so we stay under 1 request per second. If it fails or times out, the browser falls back to BigDataCloud's free client endpoint.
 - Photos, in order: Wikimedia Commons geosearch by coordinates, then the Wikipedia page image for the place, then a small bundled set of ocean and region fallback images.
-- Photo credits: photos fetched live may carry any Commons licence. Show the author and licence name, linked to the Commons file page, in a small italic caption. Do not overlay text on photos; cropping with `object-fit` is fine.
+- Photo credits: photos fetched live may carry any Commons licence. Always show the credit: the author and licence name, linked to the Commons file page, in a small italic caption.
+- Text may be laid over photos. Never edit or crop the image file itself; `object-fit` only changes how it is framed on screen.
 - Grounding text: the Wikipedia REST summary, plus Wikivoyage when available.
 - Wikipedia, Wikivoyage, Commons and BigDataCloud are called from the browser, because outbound internet from Databricks may be restricted. `/api` is for AI and geocoding only.
 

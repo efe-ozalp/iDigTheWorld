@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { LatLon } from '../../../shared/types';
 import { DIG_SECONDS, EARTH_RADIUS_KM, LAYERS, LEGS, journeyAt, type JourneyPoint } from '../../data/layers';
 import type { DestinationState } from '../../lib/destination';
@@ -10,25 +10,22 @@ interface Props {
   exit: LatLon;
   /** Name of the starting place, when it is known. */
   originName?: string;
-  /** Name of the place at the far end. Kept back until the digger has surfaced. */
-  exitName?: string;
   destination: DestinationState;
   /** Run the shorter, stepped version for people who prefer less motion. */
   reducedMotion: boolean;
   /** Stack the diagram above its captions, for narrow screens. */
   compact: boolean;
-  /** True once the digger is out and the far end has been looked up. */
-  surfaced: boolean;
-  /** Called once, when the animation reaches the far surface. */
+  /** Called once, a moment after the animation reaches the far surface. */
   onReachSurface: () => void;
-  /** Shown beside the diagram after surfacing. */
-  children?: ReactNode;
 }
 
 const TUNNEL_KM = 2 * EARTH_RADIUS_KM;
 
 /** In the reduced-motion version the digger jumps from layer to layer at this pace. */
 const STEP_SECONDS = 0.5;
+
+/** How long the finished diagram stays up before the arrival takes over the screen. */
+const ARRIVAL_PAUSE_MS = 700;
 
 const whole = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 
@@ -64,33 +61,39 @@ function useDigClock(seconds: number, onDone: () => void) {
   const reported = useRef(false);
 
   useEffect(() => {
+    let frame = 0;
+    let pause: ReturnType<typeof setTimeout> | undefined;
+
     const finish = () => {
       setElapsed(seconds);
-      if (!reported.current) {
+      pause = setTimeout(() => {
+        if (reported.current) return;
         reported.current = true;
         onDoneRef.current();
-      }
+      }, ARRIVAL_PAUSE_MS);
     };
 
     if (skipped) {
       finish();
-      return;
+    } else {
+      let startedAt: number | null = null;
+      const tick = (now: number) => {
+        startedAt ??= now;
+        const t = (now - startedAt) / 1000;
+        if (t >= seconds) {
+          finish();
+          return;
+        }
+        setElapsed(t);
+        frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
     }
 
-    let frame = 0;
-    let startedAt: number | null = null;
-    const tick = (now: number) => {
-      startedAt ??= now;
-      const t = (now - startedAt) / 1000;
-      if (t >= seconds) {
-        finish();
-        return;
-      }
-      setElapsed(t);
-      frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(pause);
     };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
   }, [seconds, skipped]);
 
   const skip = useCallback(() => setSkipped(true), []);
@@ -102,13 +105,10 @@ export default function DigScene({
   origin,
   exit,
   originName,
-  exitName,
   destination,
   reducedMotion,
   compact,
-  surfaced,
   onReachSurface,
-  children,
 }: Props) {
   const { elapsed, finished, skip } = useDigClock(reducedMotion ? LEGS.length * STEP_SECONDS : DIG_SECONDS, onReachSurface);
 
@@ -137,11 +137,10 @@ export default function DigScene({
   const startCoords = formatCoords(origin);
   const exitCoords = formatCoords(exit);
   const place = (block: CSSProperties) => (compact ? undefined : block);
-  const classes = ['dig', compact && 'dig--compact', surfaced && 'dig--surfaced'].filter(Boolean).join(' ');
 
   return (
     <section
-      className={classes}
+      className={compact ? 'dig dig--compact' : 'dig'}
       ref={root}
       tabIndex={-1}
       aria-label="Digging through the Earth"
@@ -154,10 +153,10 @@ export default function DigScene({
           wobble={wobble}
           reached={reached}
           arrived={finished}
-          leaders={!compact && !surfaced}
+          leaders={!compact}
           compact={compact}
           startLabel={originName ? `${originName} · ${startCoords}` : startCoords}
-          exitLabel={surfaced && exitName ? `${exitName} · ${exitCoords}` : exitCoords}
+          exitLabel={exitCoords}
         />
 
         <header className="dig__block dig__heading" style={place(at(LABEL_X, 12, 385))}>
@@ -227,8 +226,6 @@ export default function DigScene({
           {point.ascending ? '' : point.layer.fact}
         </p>
       </div>
-
-      {surfaced && <div className="dig__arrival">{children}</div>}
     </section>
   );
 }

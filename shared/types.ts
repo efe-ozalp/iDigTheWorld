@@ -20,7 +20,10 @@ export interface Place extends LatLon {
   oceanName?: string;
   summary: string;
   photoUrl: string;
+  /** Who made the photo and under what licence, e.g. "Photo: A. Author, CC BY-SA 4.0". Always shown with the photo. */
   photoCredit: string;
+  /** The photo's page at its source (for Wikimedia Commons, the file page), which the credit links to. */
+  photoPageUrl?: string;
   /** Wall-clock time at the place when it was looked up, e.g. "Saturday 9:41 PM". */
   localTime: string;
   /**

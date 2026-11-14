@@ -1,4 +1,5 @@
-import type { Dig, LatLon, Place } from '../../shared/types';
+import type { Dig, LatLon } from '../../shared/types';
+import { findCard } from '../lib/cards';
 import { EARTH_DIAMETER_KM, formatCoords } from '../lib/geo';
 import PlaceCard from './PlaceCard';
 
@@ -19,11 +20,6 @@ interface Props {
   onToggleView: () => void;
   /** Closes the origin card and frees the globe so another spot can be found. */
   onClose: () => void;
-}
-
-/** The three overview facts written for a place, if the dig has them. */
-function overviewFacts(dig: Dig, place: Place): readonly string[] | undefined {
-  return dig.cards.find((c) => c.placeName === place.name && c.topicPath.length === 0)?.facts;
 }
 
 /** The side panel: an invitation to pick a spot, then the origin card for the spot picked. */
@@ -49,7 +45,7 @@ export default function DigPanel({
             </h2>
             <p className="coords">{formatCoords(origin)}</p>
             {dig ? (
-              <PlaceCard place={dig.origin} facts={overviewFacts(dig, dig.origin)} />
+              <PlaceCard place={dig.origin} facts={findCard(dig.cards, dig.origin.name, [])?.facts} />
             ) : (
               <p className="note note--inset">
                 Names, photos and facts for any spot you pick arrive with live data in phase 3. The sample digs below
