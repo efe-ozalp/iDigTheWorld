@@ -85,6 +85,7 @@ Interaction decisions:
 - `/api/health` reports whether the model endpoint answers and whether `nominatim.openstreetmap.org`, `en.wikipedia.org` and `api.anthropic.com` are reachable from the server. Check it after every deploy.
 - To deploy to Databricks: create a custom app from the Git repository, add the serving endpoint as a Model resource with "Can query", then Deploy > From Git with branch `main`. Build and app logs are at `<app-url>/logz`.
 - Free Edition stops an app 24 hours after it was last started or deployed, so restart it before a demo.
+- Databricks' docs (November 2026) mark the `databricks-*` foundation model serving endpoints as Legacy in the app resource picker and steer new work to Unity Gateway model services. We use the serving endpoint because it is what Free Edition is known to answer on. If it stops answering, check `/api/health` first, then look at the Unity Gateway route.
 
 ## Design direction: Utopian Scholastic
 

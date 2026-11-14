@@ -12,9 +12,13 @@ interface Props {
   sampleDigs: Dig[];
   /** Which end of the tunnel the globe is currently turned toward. */
   viewing: Side;
+  /** True while the dig scene covers the panel, to keep focus and clicks out of it. */
+  hidden: boolean;
+  onDig: () => void;
   onPickSample: (dig: Dig) => void;
   onToggleView: () => void;
-  onReset: () => void;
+  /** Closes the origin card and frees the globe so another spot can be found. */
+  onClose: () => void;
 }
 
 /** The three overview facts written for a place, if the dig has them. */
@@ -22,18 +26,21 @@ function overviewFacts(dig: Dig, place: Place): readonly string[] | undefined {
   return dig.cards.find((c) => c.placeName === place.name && c.topicPath.length === 0)?.facts;
 }
 
+/** The side panel: an invitation to pick a spot, then the origin card for the spot picked. */
 export default function DigPanel({
   origin,
   exit,
   dig,
   sampleDigs,
   viewing,
+  hidden,
+  onDig,
   onPickSample,
   onToggleView,
-  onReset,
+  onClose,
 }: Props) {
   return (
-    <aside className="panel">
+    <aside className="panel" inert={hidden}>
       {origin && exit ? (
         <>
           <section className="stop">
@@ -41,7 +48,14 @@ export default function DigPanel({
               <span className="callout">1</span> You start here
             </h2>
             <p className="coords">{formatCoords(origin)}</p>
-            {dig && <PlaceCard place={dig.origin} facts={overviewFacts(dig, dig.origin)} />}
+            {dig ? (
+              <PlaceCard place={dig.origin} facts={overviewFacts(dig, dig.origin)} />
+            ) : (
+              <p className="note note--inset">
+                Names, photos and facts for any spot you pick arrive with live data in phase 3. The sample digs below
+                show a complete trip.
+              </p>
+            )}
           </section>
 
           <p className="tunnel">
@@ -50,26 +64,27 @@ export default function DigPanel({
 
           <section className="stop">
             <h2 className="stop__heading">
-              <span className="callout callout--exit">2</span> You come out here
+              <span className="callout callout--exit">2</span> You will come out here
             </h2>
             <p className="coords">{formatCoords(exit)}</p>
-            {dig && <PlaceCard place={dig.destination} />}
+            <p className="stop__teaser">What is there? Dig to find out.</p>
           </section>
 
-          {!dig && (
-            <p className="note">
-              Names, photos and facts for any spot you pick arrive with live data in phase 3. Until then, the sample
-              digs below show a complete start and finish.
-            </p>
-          )}
-
-          <div className="actions">
-            <button type="button" className="btn btn--primary" onClick={onToggleView}>
-              {viewing === 'origin' ? 'See the other side' : 'Back to my digger'}
-            </button>
-            <button type="button" className="btn" onClick={onReset}>
-              Start over
-            </button>
+          <div className="dig-bar">
+            <div className="dig-bar__main">
+              <button type="button" className="btn btn--primary btn--dig" onClick={onDig}>
+                Dig!
+              </button>
+              <p className="dig-bar__hint">or flick down anywhere, or press the ↓ key</p>
+            </div>
+            <div className="actions">
+              <button type="button" className="btn" onClick={onToggleView}>
+                {viewing === 'origin' ? 'See the other side' : 'Back to my digger'}
+              </button>
+              <button type="button" className="btn" onClick={onClose}>
+                Pick another spot
+              </button>
+            </div>
           </div>
         </>
       ) : (

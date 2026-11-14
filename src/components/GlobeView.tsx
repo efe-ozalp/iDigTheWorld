@@ -13,6 +13,13 @@ interface Props {
   origin: LatLon | null;
   /** The antipode of origin, marked with a flag. */
   exit: LatLon | null;
+  /**
+   * Stops dragging from turning the globe, so a downward flick can mean "dig"
+   * instead. Clicking a spot and camera moves made by the app still work.
+   */
+  locked: boolean;
+  /** Stops rendering while another screen covers the globe. */
+  paused: boolean;
   onPick: (point: LatLon) => void;
   ref?: Ref<GlobeViewHandle>;
 }
@@ -35,7 +42,7 @@ const fadeMarker = (el: HTMLElement, isVisible: boolean) => {
 const GLOBE_RADIUS = 100; // globe.gl's fixed scene units
 const FLY_MS = 1100;
 
-export default function GlobeView({ origin, exit, onPick, ref }: Props) {
+export default function GlobeView({ origin, exit, locked, paused, onPick, ref }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
@@ -76,6 +83,18 @@ export default function GlobeView({ origin, exit, onPick, ref }: Props) {
 
     return () => controls.removeEventListener('start', stopSpinning);
   }, [hasGlobe]);
+
+  useEffect(() => {
+    const globe = globeRef.current;
+    if (hasGlobe && globe) globe.controls().enableRotate = !locked;
+  }, [hasGlobe, locked]);
+
+  useEffect(() => {
+    const globe = globeRef.current;
+    if (!hasGlobe || !globe) return;
+    if (paused) globe.pauseAnimation();
+    else globe.resumeAnimation();
+  }, [hasGlobe, paused]);
 
   const flyTo = useCallback((point: LatLon, ms = FLY_MS) => {
     const globe = globeRef.current;

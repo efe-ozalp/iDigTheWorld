@@ -39,7 +39,8 @@ button {
 
 .masthead {
   position: relative;
-  z-index: 1;
+  /* Above the dig scene, so the coloured rule under the masthead always shows. */
+  z-index: 5;
   display: flex;
   align-items: baseline;
   gap: 1rem;
@@ -81,6 +82,7 @@ button {
 }
 
 .stage {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 430px);
   min-height: 0;
@@ -277,10 +279,62 @@ button {
   border-left: 3px solid var(--sun);
 }
 
+.note--inset {
+  margin: 0.7rem 0 0 2.15rem;
+}
+
+.stop__teaser {
+  margin: 0.15rem 0 0 2.15rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
+}
+
+/* The dig controls stay in view at the foot of the panel while the card scrolls. */
+.dig-bar {
+  position: sticky;
+  bottom: -1.5rem;
+  z-index: 1;
+  display: grid;
+  gap: 0.7rem;
+  margin: 0 -1.5rem;
+  padding: 0.9rem 1.5rem 1rem;
+  background: var(--card);
+  border-top: 1px solid var(--rule);
+}
+
+.dig-bar__main {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.dig-bar__hint {
+  font-size: 0.88rem;
+  font-style: italic;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+/* While the origin card is open a mouse drag anywhere means "dig", so it
+   should not also select the card's text. */
+.app--armed .panel {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* ---------- Place card ---------- */
@@ -415,6 +469,17 @@ button {
   border-color: #981e16 #ee7b72 #ee7b72 #981e16;
 }
 
+.btn--dig {
+  padding: 0.5rem 1.7rem;
+  font-size: 1.3rem;
+}
+
+.btn--small {
+  padding: 0.15rem 0.7rem;
+  font-size: 0.85rem;
+  font-style: normal;
+}
+
 /* ---------- Sample digs ---------- */
 
 .samples {
@@ -438,6 +503,392 @@ button {
   gap: 0.6rem;
   width: 100%;
   text-align: left;
+}
+
+/* ---------- Dig scene ---------- */
+
+/* Covers the globe and the panel for the length of a dig. */
+.dig {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--paper);
+  container-type: size;
+}
+
+.dig:focus {
+  outline: none;
+}
+
+/* The diagram and its captions share one coordinate system. DigScene passes
+   the SVG's size in as --view-w and --view-h, and --u is one unit of it, so
+   HTML laid over the drawing scales with the drawing. */
+.dig__spread {
+  --u: calc(100cqw / var(--view-w));
+  position: relative;
+  width: min(97cqw, 95cqh * var(--view-w) / var(--view-h), 1500px);
+  aspect-ratio: var(--view-w) / var(--view-h);
+  container-type: inline-size;
+}
+
+.cutaway {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.cutaway text {
+  font-family: var(--serif);
+  fill: var(--ink);
+}
+
+.cutaway__label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.cutaway__sublabel {
+  font-size: 14.5px;
+  font-style: italic;
+}
+
+.cutaway__note {
+  font-size: 12px;
+  font-style: italic;
+  fill: var(--ink-soft);
+}
+
+.cutaway__veil {
+  stroke: var(--paper);
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+
+.cutaway__bore {
+  stroke: #2b1d10;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.cutaway__leader {
+  opacity: 0.3;
+  transition: opacity 0.4s;
+}
+
+.cutaway__leader.is-lit {
+  opacity: 1;
+}
+
+.cutaway__leader polyline {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+.cutaway__leader circle {
+  fill: var(--ink);
+}
+
+.cutaway__digger {
+  filter: drop-shadow(0 3px 3px rgb(0 0 0 / 0.35));
+}
+
+.cutaway__lamp {
+  fill: var(--card);
+  stroke: #3d2a17;
+  stroke-width: 1.6;
+}
+
+/* HTML placed on the diagram (see `at()` in DigScene.tsx). */
+.dig__block {
+  position: absolute;
+  font-size: calc(15 * var(--u));
+  line-height: 1.35;
+}
+
+.dig__eyebrow {
+  font-size: calc(11.5 * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.dig__title {
+  font-size: calc(27 * var(--u));
+  line-height: 1.1;
+}
+
+/* Instrument plate: sunken bevel, like a gauge on a CD-ROM screen. */
+.readout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(4 * var(--u)) calc(14 * var(--u));
+  padding: calc(8 * var(--u)) calc(14 * var(--u));
+  background: var(--card);
+  border: calc(2 * var(--u)) solid;
+  border-color: #b7ab8d #fffdf6 #fffdf6 #b7ab8d;
+  box-shadow: 0 0 0 1px #8f8468;
+}
+
+.readout__cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.readout__label {
+  font-size: calc(10.5 * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.readout__value {
+  font-size: calc(27 * var(--u));
+  font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.15;
+}
+
+.readout__value small {
+  font-size: 55%;
+  font-weight: 400;
+}
+
+.readout__track {
+  grid-column: 1 / -1;
+  height: calc(7 * var(--u));
+  background: var(--paper-shade);
+  border: 1px solid var(--rule);
+}
+
+.readout__fill {
+  display: block;
+  height: 100%;
+  background: var(--food);
+}
+
+.readout__dug {
+  grid-column: 1 / -1;
+  font-size: calc(11.5 * var(--u));
+  font-style: italic;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--ink-soft);
+}
+
+/* Numbered callouts, one per layer, at the end of the leader lines. */
+.callouts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.callouts__item {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(10 * var(--u));
+  transition: opacity 0.4s;
+}
+
+.callouts__number {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+  font-size: calc(15 * var(--u));
+  font-weight: 700;
+  line-height: 1;
+  background: var(--card);
+  border: calc(2.5 * var(--u)) solid var(--layer);
+  border-radius: 50%;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
+}
+
+.callouts__name {
+  font-size: calc(17 * var(--u));
+  line-height: 1.3;
+}
+
+.callouts__state {
+  margin-left: 0.25em;
+  font-size: calc(11 * var(--u));
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.callouts__range {
+  font-size: calc(11.5 * var(--u));
+  font-variant-numeric: lining-nums;
+  color: var(--ink-soft);
+}
+
+.callouts__fact {
+  font-size: calc(13.5 * var(--u));
+  font-style: italic;
+  transition: opacity 0.5s;
+}
+
+/* Not reached yet: the name is there to read ahead, the fact is held back. */
+.callouts__item.is-ahead {
+  opacity: 0.38;
+}
+
+.callouts__item.is-ahead .callouts__fact {
+  opacity: 0;
+}
+
+.callouts__item.is-here .callouts__number {
+  background: var(--layer);
+  transform: scale(1.14);
+}
+
+.dig__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(12 * var(--u));
+  font-size: calc(13.5 * var(--u));
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+/* Once the digger is out, the captions make way for the arrival card. */
+.dig--surfaced:not(.dig--compact) .dig__block {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
+}
+
+/* The arrival card takes the captions' place. */
+.dig__arrival {
+  position: absolute;
+  top: 1rem;
+  right: 1.2rem;
+  bottom: 1rem;
+  width: min(430px, 42%);
+  overflow-y: auto;
+  padding: 1.4rem 1.4rem 1.2rem;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow-cutout);
+  animation: arrival-in 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes arrival-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+.arrival:focus {
+  outline: none;
+}
+
+.arrival__title {
+  margin-top: 0.2rem;
+  font-size: 1.9rem;
+  line-height: 1.15;
+}
+
+.arrival__lede {
+  margin-top: 0.4rem;
+  color: var(--ink-soft);
+}
+
+.arrival .place {
+  margin: 1rem 0 0;
+}
+
+.arrival .note,
+.arrival .actions {
+  margin-top: 1.1rem;
+}
+
+/* Narrow screens: the dig takes over the whole screen, with the diagram on
+   top and its captions in a list underneath. */
+.dig--compact {
+  position: fixed;
+  z-index: 10;
+  display: block;
+  overflow-y: auto;
+  container-type: normal;
+}
+
+.dig--compact .dig__spread {
+  --u: 1px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  width: auto;
+  padding: 0.8rem 1rem 1.5rem;
+  aspect-ratio: auto;
+  container-type: normal;
+}
+
+.dig--compact .dig__block {
+  position: static;
+}
+
+.dig--compact .cutaway {
+  position: static;
+  order: 1;
+  height: auto;
+  max-height: 54dvh;
+}
+
+.dig--compact .readout {
+  order: 2;
+}
+
+.dig--compact .dig__status {
+  order: 3;
+}
+
+.dig--compact .callouts {
+  order: 4;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.dig--compact .dig__arrival {
+  position: static;
+  width: auto;
+  margin: 1rem;
+}
+
+/* On arrival the card replaces the diagram instead of sitting below it. */
+.dig--compact.dig--surfaced .dig__spread {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cutaway__veil,
+  .cutaway__leader,
+  .dig--surfaced:not(.dig--compact) .dig__block,
+  .callouts__item,
+  .callouts__number,
+  .callouts__fact {
+    transition: none;
+  }
+
+  .dig__arrival {
+    animation: none;
+  }
 }
 
 /* ---------- Small screens: stack the globe above the panel ---------- */
