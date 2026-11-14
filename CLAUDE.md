@@ -65,7 +65,7 @@ Interaction decisions:
 - Reverse geocoding: `/api/geocode` calls Nominatim with a User-Agent (contact from `NOMINATIM_CONTACT`) and caches results by rounded latitude and longitude so we stay under 1 request per second. If it fails or times out, the browser falls back to BigDataCloud's free client endpoint.
 - Until the AI cards exist, a place's summary is the opening of its Wikipedia article and its facts are the sentences that follow.
 - Time zones come from the `tz-lookup` package on land and from nautical time (one hour per 15° of longitude) at sea.
-- Photos, in order: Wikimedia Commons geosearch by coordinates, then the Wikipedia page image for the place, then a small bundled set of ocean and region fallback images.
+- Photos, in order (`src/lib/photos.ts`): the photographs in the place's own Wikipedia article (lead image, then the rest), the place's Wikidata image, Commons photos taken within 10 km, a Commons search for the place's name, then one bundled ocean photo for open water. Maps, flags and charts are skipped, and so are astronaut photos in the coordinate search, because they are tagged with the point under the spacecraft and show somewhere else.
 - Photo credits: photos fetched live may carry any Commons licence. Always show the credit: the author and licence name, linked to the Commons file page, in a small italic caption.
 - Text may be laid over photos. Never edit or crop the image file itself; `object-fit` only changes how it is framed on screen.
 - Grounding text: the Wikipedia REST summary, plus Wikivoyage when available.

@@ -10,6 +10,8 @@ export interface WikiSummary {
   coordinates?: LatLon;
   /** The article's lead image, when it has one. */
   imageUrl?: string;
+  /** The Wikidata item for the article's subject, e.g. "Q1239". */
+  wikidataId?: string;
 }
 
 interface SummaryReply {
@@ -18,6 +20,7 @@ interface SummaryReply {
   extract?: string;
   coordinates?: { lat: number; lon: number };
   originalimage?: { source: string };
+  wikibase_item?: string;
   content_urls?: { desktop?: { page?: string } };
 }
 
@@ -37,6 +40,7 @@ export async function wikiSummary(title: string): Promise<WikiSummary | null> {
       pageUrl: reply.content_urls?.desktop?.page ?? `https://en.wikipedia.org/wiki/${encodeURIComponent(reply.title)}`,
       coordinates: reply.coordinates,
       imageUrl: reply.originalimage?.source,
+      wikidataId: reply.wikibase_item,
     };
   } catch {
     return null;

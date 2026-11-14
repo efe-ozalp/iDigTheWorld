@@ -1,7 +1,7 @@
 import type { LatLon, Place } from '../../shared/types';
 import { reverseGeocode } from './geocode';
 import { marineNameAt } from './ocean';
-import { commonsPhotoFromUrl, commonsPhotoNear, OCEAN_FALLBACK, type Photo } from './photos';
+import { findPhoto, OCEAN_FALLBACK } from './photos';
 import { localTimeIn } from './time';
 import { findArticle, sentences, wikiSummary, type WikiSummary } from './wiki';
 
@@ -30,8 +30,6 @@ async function landZone({ lat, lon }: LatLon): Promise<string> {
 }
 
 async function build(point: LatLon): Promise<PlaceLookup | null> {
-  // Started together: none of these depends on another.
-  const photoNearby = commonsPhotoNear(point);
   const [geo, sea] = await Promise.all([reverseGeocode(point), marineNameAt(point)]);
 
   // Both geocoders down and not in any known sea: nothing can be said about this spot.
@@ -52,11 +50,9 @@ async function build(point: LatLon): Promise<PlaceLookup | null> {
     article = sea || country ? await wikiSummary(sea ?? country) : null;
   }
 
-  // Photos, in order: taken nearby, then the article's own picture (on land,
-  // where it is likely to be a view and not a chart), then the bundled ocean view.
-  let photo: Photo | null = await photoNearby;
-  if (!photo && !isOcean && article?.imageUrl) photo = await commonsPhotoFromUrl(article.imageUrl);
-  if (!photo && isOcean) photo = OCEAN_FALLBACK;
+  // A photo that shows the place itself; failing that, open water gets the bundled ocean view.
+  const search = geo?.found ? `"${name}" ${geo.region || country}` : `"${name}"`;
+  const photo = (await findPhoto({ point, search, article })) ?? (isOcean ? OCEAN_FALLBACK : null);
 
   // The opening of the article is the summary and the sentences after it are
   // the facts. A short article gives up only its first sentence as summary.

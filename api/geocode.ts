@@ -43,7 +43,9 @@ interface NominatimReply {
 function toResult(reply: NominatimReply): GeocodeResult {
   const a = reply.address ?? {};
   if (reply.error || !a.country) return { found: false, name: '', region: '', country: '' };
-  const name = a.city || a.town || a.village || a.municipality || a.suburb || a.county || a.state_district || a.state || reply.name || a.country;
+  // The most local name that is written in Latin script; some places have no English name on the map.
+  const local = [a.city, a.town, a.village, a.municipality, a.suburb, a.county, a.state_district, a.state, reply.name];
+  const name = local.find((n) => n && /[A-Za-z]/.test(n)) ?? a.country;
   const wikipedia = reply.extratags?.wikipedia;
   return {
     found: true,
