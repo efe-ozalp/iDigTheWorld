@@ -1,0 +1,15 @@
+# Dependencies and build output
+node_modules
+dist
+dist-server
+
+# Secrets: every .env file is ignored except the committed template
+.env
+.env.*
+!.env.example
+
+# Tooling
+.vercel
+.databricks
+*.log
+.DS_Store
