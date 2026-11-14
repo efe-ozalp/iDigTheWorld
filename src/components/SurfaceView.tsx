@@ -17,11 +17,10 @@ interface Props {
 }
 
 const TOPIC_LABEL: Record<Topic, string> = {
-  food: 'Food',
+  cuisine: 'Cuisine',
   culture: 'Culture',
   history: 'History',
-  nature: 'Nature',
-  language: 'Language',
+  biosphere: 'Biosphere',
 };
 
 const isTopic = (value: string): value is Topic => (TOPICS as readonly string[]).includes(value);
@@ -55,11 +54,11 @@ export default function SurfaceView({ exit, place, cards, compact, onShowOnGlobe
   const overview = place ? findCard(cards, place.name, []) : undefined;
   const facts = (overview?.facts ?? []).slice(0, CALLOUTS.length);
 
-  // Open water has no food or language to explore, so it offers only what its overview lists.
+  // Open water has no cuisine or culture to explore, so it offers only what its overview lists.
   const topics: readonly Topic[] = !place
     ? []
     : place.isOcean
-      ? (overview?.subtopics.filter(isTopic) ?? ['nature'])
+      ? (overview?.subtopics.filter(isTopic) ?? ['biosphere'])
       : TOPICS;
 
   const [openTopic, setOpenTopic] = useState<Topic | null>(null);

@@ -49,7 +49,7 @@ button {
   border-bottom: 1px solid var(--rule);
 }
 
-/* Five solid stripes, one per topic, like the edge of an index tab strip. */
+/* Four solid stripes, one per topic, like the edge of an index tab strip. */
 .masthead::after {
   content: '';
   position: absolute;
@@ -57,11 +57,10 @@ button {
   height: 4px;
   background: linear-gradient(
     90deg,
-    var(--food) 0 20%,
-    var(--history) 20% 40%,
-    var(--nature) 40% 60%,
-    var(--culture) 60% 80%,
-    var(--language) 80% 100%
+    var(--cuisine) 0 25%,
+    var(--history) 25% 50%,
+    var(--biosphere) 50% 75%,
+    var(--culture) 75% 100%
   );
 }
 
@@ -73,7 +72,7 @@ button {
 }
 
 .wordmark i {
-  color: var(--food);
+  color: var(--red);
 }
 
 .strapline {
@@ -245,13 +244,13 @@ button {
   font-weight: 700;
   line-height: 1;
   color: #fff;
-  background: var(--food);
+  background: var(--red);
   border-radius: 50%;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
 }
 
 .callout--exit {
-  background: var(--culture);
+  background: var(--blue);
 }
 
 .coords {
@@ -410,7 +409,7 @@ button {
 
 .facts li::marker {
   font-weight: 700;
-  color: var(--food);
+  color: var(--red);
 }
 
 .tag {
@@ -425,11 +424,11 @@ button {
 }
 
 .tag--land {
-  color: var(--nature);
+  color: var(--green);
 }
 
 .tag--ocean {
-  color: var(--culture);
+  color: var(--blue);
 }
 
 /* ---------- Buttons: light CD-ROM bevel ---------- */
@@ -456,13 +455,13 @@ button {
 }
 
 .btn:focus-visible {
-  outline: 3px solid var(--culture);
+  outline: 3px solid var(--blue);
   outline-offset: 2px;
 }
 
 .btn--primary {
   color: #fff;
-  background: var(--food);
+  background: var(--red);
   border-color: #ee7b72 #981e16 #981e16 #ee7b72;
   box-shadow: 0 0 0 1px #6d140f;
 }
@@ -679,7 +678,7 @@ button {
 .readout__fill {
   display: block;
   height: 100%;
-  background: var(--food);
+  background: var(--red);
 }
 
 .readout__dug {
@@ -1049,7 +1048,7 @@ button {
   line-height: 1;
   color: var(--ink);
   background: var(--cream);
-  border: 2px solid var(--food);
+  border: 2px solid var(--red);
   border-radius: 50%;
   box-shadow: 0 2px 6px rgb(0 0 0 / 0.55);
 }
@@ -1136,8 +1135,8 @@ button {
   outline-offset: 2px;
 }
 
-.tab--food {
-  --tab: var(--food);
+.tab--cuisine {
+  --tab: var(--cuisine);
 }
 
 .tab--culture {
@@ -1150,13 +1149,10 @@ button {
   --tab-ink: var(--ink);
 }
 
-.tab--nature {
-  --tab: var(--nature);
+.tab--biosphere {
+  --tab: var(--biosphere);
 }
 
-.tab--language {
-  --tab: var(--language);
-}
 
 /* The card a tab opens, standing on the tab strip. */
 .topic-plate {
@@ -1175,8 +1171,8 @@ button {
   box-shadow: 0 16px 30px -10px rgb(0 0 0 / 0.7);
 }
 
-.topic-plate--food {
-  --tab: var(--food);
+.topic-plate--cuisine {
+  --tab: var(--cuisine);
 }
 
 .topic-plate--culture {
@@ -1187,13 +1183,10 @@ button {
   --tab: var(--history);
 }
 
-.topic-plate--nature {
-  --tab: var(--nature);
+.topic-plate--biosphere {
+  --tab: var(--biosphere);
 }
 
-.topic-plate--language {
-  --tab: var(--language);
-}
 
 .topic-plate__close {
   float: right;

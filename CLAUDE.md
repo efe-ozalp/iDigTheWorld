@@ -1,6 +1,6 @@
 # iDigTheWorld
 
-A hackathon web app. The user spins a 3D Earth, drops an explorer on any spot, digs straight through the planet and surfaces at the exact antipode. The app teaches them about both ends of the tunnel, then offers AI-written topic cards (food, culture, history, nature, language) they can keep digging into.
+A hackathon web app. The user spins a 3D Earth, drops an explorer on any spot, digs straight through the planet and surfaces at the exact antipode. The app teaches them about both ends of the tunnel, then offers AI-written topic cards (cuisine, culture, history, biosphere) they can keep digging into.
 
 This file records the team's decisions. Follow them. When a decision changes, update this file in the same commit.
 
@@ -71,6 +71,7 @@ Interaction decisions:
 - `ai/provider.ts` picks the backend from `AI_PROVIDER` (`databricks` or `anthropic`).
 - Databricks, the default: the Foundation Model API through OpenAI-compatible chat completions at `{DATABRICKS_HOST}/serving-endpoints`. The endpoint name comes from `DATABRICKS_MODEL_ENDPOINT` and defaults to `databricks-llama-4-maverick`, because Claude and GPT endpoints are rate-limited to zero on Free Edition. On Databricks the app's service principal authenticates; locally use `DATABRICKS_TOKEN`.
 - Anthropic: the key comes from `ANTHROPIC_API_KEY`, and the model only from `ANTHROPIC_MODEL` with nothing hardcoded (`claude-haiku-5-5` in `.env.example`; `claude-sonnet-5-5` is the step up). Use the official SDK.
+- The topics are `cuisine`, `culture`, `history` and `biosphere` (`TOPICS` in `shared/types.ts`); the AI writes cards for these four. Open water offers only `biosphere`.
 - Every card request sends the place name, the topic path so far and the Wikipedia grounding text. Tell the model to stay consistent with the grounding text and not to invent specific names, dates or statistics it cannot support.
 - Require JSON matching `TopicCard`, validate it, and retry once on bad JSON. For Llama, give a JSON-only instruction and strip code fences before parsing.
 - Cache responses by place and topic path, in memory and in `localStorage`.
@@ -95,7 +96,7 @@ Think 1990s DK Eyewitness books and Encarta CD-ROMs: optimistic, wonder-driven, 
 - White or pale cream backgrounds with generous whitespace.
 - Cut-out objects with soft drop shadows (globe, compass, fossil, trowel) that overlap the text slightly. Draw them as SVG, one component each, so real photos can be swapped in later.
 - Classic serif for headings and body. Small italic captions joined to objects by thin leader lines.
-- Saturated primary accents, with a colour-coded tab per topic: food red, history ochre, nature green, culture blue, language purple. The tokens are in `src/styles/tokens.css`.
+- Saturated primary accents, with one colour per topic: cuisine red, history ochre, biosphere green, culture blue. The tokens are in `src/styles/tokens.css`.
 - The dig screen is a textbook cutaway diagram with numbered callouts.
 - Light CD-ROM chrome: beveled buttons and an encyclopedia-style index tab strip.
 - No dark mode, no glassmorphism, no gradients-on-everything modern SaaS look.

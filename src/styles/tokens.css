@@ -14,13 +14,18 @@
   --ink-soft: #62594a;
   --rule: #d8cdb4;
 
-  /* One colour per topic tab */
-  --food: #d2342a;
-  --history: #c98a16;
-  --nature: #2f8f3f;
-  --culture: #1f5fbf;
-  --language: #6d3fa3;
+  /* Saturated primary accents */
+  --red: #d2342a;
+  --ochre: #c98a16;
+  --green: #2f8f3f;
+  --blue: #1f5fbf;
   --sun: #f5b700;
+
+  /* One colour per topic */
+  --cuisine: var(--red);
+  --history: var(--ochre);
+  --biosphere: var(--green);
+  --culture: var(--blue);
 
   --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', 'URW Palladio L', Georgia, serif;
 

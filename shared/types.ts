@@ -33,8 +33,8 @@ export interface Place extends LatLon {
   timeZone?: string;
 }
 
-/** The five subjects every land arrival can be explored through. */
-export const TOPICS = ['food', 'culture', 'history', 'nature', 'language'] as const;
+/** The four subjects every land arrival can be explored through. Open water offers only the biosphere. */
+export const TOPICS = ['cuisine', 'culture', 'history', 'biosphere'] as const;
 export type Topic = (typeof TOPICS)[number];
 
 /** One card in the "dig deeper" tree. */
@@ -42,7 +42,7 @@ export interface TopicCard {
   id: string;
   placeName: string;
   /**
-   * The trail from the place down to this card, e.g. ["nature", "Waihi Falls"].
+   * The trail from the place down to this card, e.g. ["biosphere", "Waihi Falls"].
    * Empty for a place's overview card.
    */
   topicPath: string[];

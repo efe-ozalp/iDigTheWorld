@@ -71,7 +71,7 @@ const MADRID_TO_WEBER: Dig = {
       ],
       subtopics: [...TOPICS],
     }),
-    card('Weber', ['nature'], {
+    card('Weber', ['biosphere'], {
       title: 'A world turned upside down',
       hook: 'Standing in Weber, almost everything about the sky and the seasons runs opposite to Madrid.',
       facts: [
@@ -81,7 +81,7 @@ const MADRID_TO_WEBER: Dig = {
       ],
       subtopics: ['Waihi Falls', 'Seasons in reverse', 'Day and night'],
     }),
-    card('Weber', ['nature', 'Seasons in reverse'], {
+    card('Weber', ['biosphere', 'Seasons in reverse'], {
       title: 'Seasons in reverse',
       hook: 'When Madrid is wrapped up for winter, Weber is in the middle of summer.',
       facts: [
@@ -143,9 +143,9 @@ const MADISON_TO_INDIAN_OCEAN: Dig = {
         'It covers about 70.5 million km², roughly a fifth of all the ocean surface on Earth.',
         'It is bounded by Asia to the north, Africa to the west and Australia to the east.',
       ],
-      subtopics: ['nature'],
+      subtopics: ['biosphere'],
     }),
-    card('Indian Ocean', ['nature'], {
+    card('Indian Ocean', ['biosphere'], {
       title: 'Life in the open ocean',
       hook: 'There is no land in sight, but these southern waters are far from empty.',
       facts: [
