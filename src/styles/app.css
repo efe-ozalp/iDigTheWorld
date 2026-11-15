@@ -1627,6 +1627,341 @@ button {
   width: auto;
 }
 
+/* ---------- Today's Dig, the sticker and the passport ---------- */
+
+/* A paper tag pinned to the top corner of the globe. */
+.today {
+  position: absolute;
+  top: 1.1rem;
+  left: 1.2rem;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem 0.35rem;
+  font-size: 0.95rem;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-left: 5px solid var(--sun);
+  box-shadow: var(--shadow-cutout);
+  transform: rotate(-1.5deg);
+  cursor: pointer;
+}
+
+.today:hover:not(:disabled) {
+  background: #fff;
+  transform: rotate(-1.5deg) translateY(-1px);
+}
+
+.today:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.today__label {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.today__found {
+  margin-left: 0.3rem;
+  padding: 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--green);
+  border-radius: 2px;
+}
+
+/* The sticker on the day's bedrock card. */
+.sticker-find {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.9rem;
+}
+
+.sticker-find__note {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.sticker {
+  flex: none;
+  width: 7.5rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: grab;
+  transform: rotate(-6deg);
+  transform-origin: 20% 80%;
+  filter: drop-shadow(0 2px 2px rgb(54 40 12 / 0.45));
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+  animation: sticker-wiggle 2.8s ease-in-out 1s infinite;
+}
+
+.sticker img,
+.sticker-fly,
+.passport__sticker img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+/* One corner comes up, as if a fingernail had got under it. */
+.sticker:hover,
+.sticker:focus-visible {
+  animation: none;
+  transform: perspective(500px) rotate(-6deg) rotateX(-16deg) rotateY(14deg) scale(1.07);
+  filter: drop-shadow(0 10px 8px rgb(54 40 12 / 0.45));
+}
+
+.sticker:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+}
+
+@keyframes sticker-wiggle {
+  0%,
+  86%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  90% {
+    transform: rotate(-10deg) scale(1.04);
+  }
+  95% {
+    transform: rotate(-3deg) scale(1.04);
+  }
+}
+
+/* The peeled sticker: lifted off the card, held up, then flung to the passport's corner. */
+.sticker-fly {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  transform-origin: 20% 80%;
+  filter: drop-shadow(0 16px 12px rgb(0 0 0 / 0.45));
+  animation: sticker-peel 1.3s cubic-bezier(0.45, 0, 0.25, 1) both;
+}
+
+@keyframes sticker-peel {
+  0% {
+    opacity: 1;
+    transform: perspective(600px) translate(0, 0) rotateX(0deg) rotateY(0deg) rotate(-6deg) scale(1);
+  }
+  20% {
+    transform: perspective(600px) translate(0, -6px) rotateX(-30deg) rotateY(24deg) rotate(-6deg) scale(1.06);
+  }
+  42% {
+    transform: perspective(600px) translate(0, -26px) rotateX(0deg) rotateY(0deg) rotate(5deg) scale(1.4);
+  }
+  56% {
+    transform: perspective(600px) translate(0, -22px) rotateX(0deg) rotateY(0deg) rotate(-3deg) scale(1.34);
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(600px) translate(var(--dx), var(--dy)) rotateX(0deg) rotateY(0deg) rotate(16deg) scale(0.2);
+  }
+}
+
+/* The closed passport, kept in the bottom-right corner of the globe view. */
+.passport-button {
+  position: fixed;
+  right: 1.3rem;
+  bottom: 1rem;
+  z-index: 6;
+  display: grid;
+  justify-items: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.passport-book {
+  width: 3.4rem;
+  transform: rotate(5deg);
+  filter: drop-shadow(0 8px 6px rgb(54 40 12 / 0.4));
+  transition: transform 0.2s ease;
+}
+
+.passport-button:hover .passport-book,
+.passport-button:focus-visible .passport-book {
+  transform: rotate(1deg) translateY(-3px) scale(1.05);
+}
+
+.passport-button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+}
+
+.passport-button__label {
+  margin-top: 0.1rem;
+  padding: 0 0.4rem;
+  font-family: var(--hand);
+  font-size: 0.95rem;
+  background: var(--card);
+  box-shadow: 0 2px 4px rgb(54 40 12 / 0.35);
+  transform: rotate(-3deg);
+}
+
+.passport-button__count {
+  position: absolute;
+  top: -0.45rem;
+  right: -0.5rem;
+  min-width: 1.4rem;
+  padding: 0 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.4rem;
+  color: #fff;
+  background: var(--red);
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--card);
+}
+
+/* Room for the passport under the last sample dig. */
+.panel {
+  padding-bottom: 7.8rem;
+}
+
+/* The open passport, laid over the globe view. */
+.passport-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(34 29 22 / 0.6);
+  animation: passport-veil 0.2s ease both;
+}
+
+@keyframes passport-veil {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The navy cover, showing as a border round the two pages. */
+.passport {
+  position: relative;
+  width: min(58rem, 94vw, 128vh);
+  aspect-ratio: 1.42;
+  padding: 0.8rem;
+  background: #1b2f63;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 2px #0f1c40,
+    0 30px 50px -18px rgb(0 0 0 / 0.75);
+  animation: passport-open 0.35s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes passport-open {
+  from {
+    transform: translateY(1.5rem) scale(0.9) rotate(2deg);
+  }
+}
+
+.passport__pages {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+  background: var(--paper);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.passport__page {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1rem, 3vw, 2.2rem);
+  /* The fold down the middle. */
+  box-shadow: inset -14px 0 14px -14px rgb(54 40 12 / 0.45);
+}
+
+.passport__page--right {
+  justify-content: flex-end;
+  border-left: 1px solid var(--rule);
+  box-shadow: inset 14px 0 14px -14px rgb(54 40 12 / 0.45);
+}
+
+.passport__title {
+  margin-top: 0.2rem;
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  color: #1b2f63;
+}
+
+.passport__lede,
+.passport__tip,
+.passport__empty {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.passport__entries {
+  margin-top: auto;
+  padding-left: 1.3rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.passport__empty {
+  margin-top: auto;
+}
+
+.passport__tip {
+  text-align: right;
+}
+
+.passport__close {
+  position: absolute;
+  top: -0.9rem;
+  right: -0.9rem;
+}
+
+.passport__sticker {
+  position: absolute;
+  width: 21%;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: grab;
+  touch-action: none;
+  transform: translate(-50%, -50%) rotate(var(--tilt));
+  filter: drop-shadow(0 2px 2px rgb(54 40 12 / 0.45));
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease;
+}
+
+/* In the hand: lifted off the page until it is put down. */
+.passport__sticker--held {
+  z-index: 1;
+  cursor: grabbing;
+  transform: translate(-50%, -50%) rotate(calc(var(--tilt) + 4deg)) scale(1.1);
+  filter: drop-shadow(0 16px 12px rgb(54 40 12 / 0.5));
+}
+
+.passport__sticker:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .surface,
   .surface__photo {
@@ -1635,6 +1970,18 @@ button {
 
   .burst {
     display: none;
+  }
+
+  .sticker,
+  .passport,
+  .passport-veil {
+    animation: none;
+  }
+
+  .sticker,
+  .passport-book,
+  .passport__sticker {
+    transition: none;
   }
 
   /* No unrolling: the scroll is simply shown or hidden. */

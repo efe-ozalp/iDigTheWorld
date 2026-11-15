@@ -47,6 +47,8 @@ For local secrets, copy `.env.example` to `.env.local`.
    - A rolled parchment scroll at the left edge, below the name. It unrolls sideways on hover, and a click, tap, Enter or Space pins it open; a second click or Escape closes it. Inside are the field notes: the place summary with a "Source" line, the facts, then distance travelled (about 12,742 km), live local time and coordinates as labelled rows. The notes are a list of sections built in `src/lib/fieldNotes.ts`, with a fallback when nothing has been written about the place.
    - One cut-out object per topic, scattered at fixed positions and slightly tilted, each with a handwritten label. On land: cuisine, culture, history and biosphere (a horse). On open water: only biosphere (a fish). They never cover the name or the scroll. There is no tab strip and no text printed directly on the photo.
 5. Dig deeper: clicking a topic object opens that topic's AI-written card next to it. Each card offers 2 or 3 sub-topics, which open further cards. Depth is capped at 5 with a "you've hit bedrock" ending.
+6. Today's Dig: one place a day hides a sticker (`src/data/dailyDigs.ts`; for the demo the list holds only Madison, with the sticker under history). A small "Today's Dig: Madison" tag at the top left of the globe view sets the explorer down there. The sticker sits on that place's bedrock card (layer 5) of one topic. Clicking it peels it off: it lifts, then flies to the bottom-right corner (`StickerFind.tsx`).
+7. Passport: peeled stickers go into the passport (`src/lib/passport.ts`, kept in `localStorage` under `idig:passport:v1`). It opens from the passport object at the bottom right of the globe view only, never from a place's page. It shows two pages, and each sticker can be dragged (or moved with the arrow keys) anywhere on them and stays where it is put. The sticker pictures are the team's own PNGs in `public/stickers/`, used as supplied.
 
 Interaction decisions:
 
@@ -119,7 +121,7 @@ server.js   production server for Databricks Apps
 app.yaml    Databricks Apps configuration
 shared/     types.ts, imported by both the client and the server
 src/        the React app: components/, lib/, data/, styles/
-public/     Earth textures, bundled photos, and the topic objects (objects/)
+public/     Earth textures, bundled photos, the topic objects (objects/), particles/ and stickers/
 ```
 
 ## Things that have bitten us

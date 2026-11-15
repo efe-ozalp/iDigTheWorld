@@ -1,7 +1,9 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { MAX_TOPIC_DEPTH, type Place, type Topic, type TopicCard } from '../../shared/types';
 import { getCard, type CardResult } from '../lib/ai';
+import type { DailyDig } from '../data/dailyDigs';
 import { findCard } from '../lib/cards';
+import StickerFind from './StickerFind';
 
 interface Props {
   place: Place;
@@ -15,6 +17,8 @@ interface Props {
   prepared: readonly TopicCard[];
   /** Where the card sits on a wide screen. */
   position?: CSSProperties;
+  /** Set when this is the day's place and topic: its bedrock card carries the sticker. */
+  sticker?: DailyDig;
   onClose: () => void;
 }
 
@@ -23,7 +27,7 @@ interface Props {
  * or three narrower things to dig into; choosing one opens the next card down.
  * The fifth card is bedrock: there is nothing further to dig.
  */
-export default function TopicCards({ place, topic, topicName, grounding, prepared, position, onClose }: Props) {
+export default function TopicCards({ place, topic, topicName, grounding, prepared, position, sticker, onClose }: Props) {
   const [trail, setTrail] = useState<string[]>([topic]);
   const depth = trail.length;
 
@@ -81,14 +85,17 @@ export default function TopicCards({ place, topic, topicName, grounding, prepare
             </ol>
 
             {depth >= MAX_TOPIC_DEPTH || result.card.subtopics.length === 0 ? (
-              <div className="topic-plate__bedrock">
-                <p>
-                  <strong>You’ve hit bedrock.</strong> This is as deep as the digging goes here.
-                </p>
-                <button type="button" className="btn btn--small" onClick={() => setTrail([topic])}>
-                  Back to the top
-                </button>
-              </div>
+              <>
+                {sticker && <StickerFind dig={sticker} />}
+                <div className="topic-plate__bedrock">
+                  <p>
+                    <strong>You’ve hit bedrock.</strong> This is as deep as the digging goes here.
+                  </p>
+                  <button type="button" className="btn btn--small" onClick={() => setTrail([topic])}>
+                    Back to the top
+                  </button>
+                </div>
+              </>
             ) : (
               <div className="topic-plate__deeper">
                 <p className="topic-plate__next">Dig deeper:</p>

@@ -2,15 +2,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Dig, LatLon } from '../shared/types';
 import DigPanel, { type Side } from './components/DigPanel';
 import ErrorBoundary from './components/ErrorBoundary';
+import Passport from './components/Passport';
+import PassportBook from './components/PassportBook';
 import GlobeView, { APPROACH_MS, type GlobeViewHandle } from './components/GlobeView';
 import SurfaceView from './components/SurfaceView';
 import DigScene from './components/dig/DigScene';
+import { isDailyDig, todaysDig } from './data/dailyDigs';
 import { MOCK_DIGS } from './data/mock';
 import { preloadTopicObjects } from './data/topicObjects';
 import { findCard } from './lib/cards';
 import { nearestCoasts } from './lib/coast';
 import { loadDestination, type DestinationState } from './lib/destination';
 import { antipode, formatCoords } from './lib/geo';
+import { usePassport } from './lib/passport';
 import { lookupPlace, type PlaceLookup } from './lib/place';
 import { useCursorFlick } from './lib/useCursorFlick';
 import { useDigTriggers } from './lib/useDigTriggers';
@@ -64,6 +68,12 @@ export default function App() {
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const compact = useMediaQuery('(max-width: 820px)');
 
+  // Today's Dig, and the passport its sticker goes into. The passport opens from the globe view only.
+  const today = useMemo(() => todaysDig(), []);
+  const stickers = usePassport();
+  const [passportOpen, setPassportOpen] = useState(false);
+  const closePassport = useCallback(() => setPassportOpen(false), []);
+
   const origin = selection?.origin ?? null;
   const exit = useMemo(() => (origin ? antipode(origin) : null), [origin]);
 
@@ -115,6 +125,12 @@ export default function App() {
     (dig: Dig) => select({ origin: { lat: dig.origin.lat, lon: dig.origin.lon }, dig }),
     [select],
   );
+  /** Sets the explorer down on the day's place, from its prepared dig when there is one. */
+  const pickToday = useCallback(() => {
+    const prepared = MOCK_DIGS.find((dig) => isDailyDig(today, dig.origin));
+    if (prepared) pickSample(prepared);
+    else dropPin(today.point);
+  }, [today, pickSample, dropPin]);
 
   const approaching = selection !== null && originView === 'approach' && !(zoomDone && (originKnown || waitedEnough));
   const onOriginPage = selection !== null && !digging && originView !== 'review' && !approaching;
@@ -206,7 +222,7 @@ export default function App() {
   // Ways to start the dig: the down-arrow key or a press-and-drag flick (also
   // the touch gesture) wherever a spot is ready, and on the spot's own page a
   // fast downward throw of the cursor with no button held.
-  useDigTriggers(onOriginPage || reviewing, startDig);
+  useDigTriggers((onOriginPage || reviewing) && !passportOpen, startDig);
   useCursorFlick(onOriginPage, startDig);
 
   const covered = digging || onOriginPage;
@@ -247,6 +263,10 @@ export default function App() {
                   : 'Click anywhere on the globe to set down your explorer'}
             </p>
           </ErrorBoundary>
+          <button type="button" className="today" onClick={pickToday} disabled={approaching}>
+            <span className="today__label">Today’s Dig:</span> <strong>{today.name}</strong>
+            {stickers.some((sticker) => sticker.id === today.id) && <span className="today__found">sticker found</span>}
+          </button>
         </div>
 
         <DigPanel
@@ -264,6 +284,20 @@ export default function App() {
           onToggleView={toggleView}
           onClose={clearSelection}
         />
+
+        {!covered && (
+          <button
+            type="button"
+            className="passport-button"
+            onClick={() => setPassportOpen(true)}
+            aria-label={`Open your passport (${stickers.length} ${stickers.length === 1 ? 'sticker' : 'stickers'})`}
+          >
+            <PassportBook />
+            <span className="passport-button__label">passport</span>
+            {stickers.length > 0 && <span className="passport-button__count">{stickers.length}</span>}
+          </button>
+        )}
+        {passportOpen && !covered && <Passport todaysPlace={today.name} onClose={closePassport} />}
 
         {onOriginPage && origin && (
           <SurfaceView

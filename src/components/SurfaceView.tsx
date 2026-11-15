@@ -9,6 +9,7 @@ import { useLocalClock } from '../lib/useLocalClock';
 import Burst from './Burst';
 import FieldNotes from './FieldNotes';
 import TopicCards from './TopicCards';
+import { isDailyDig, todaysDig } from '../data/dailyDigs';
 import TopicObject from './TopicObject';
 
 interface Props {
@@ -95,6 +96,8 @@ export default function SurfaceView({
       : TOPICS;
 
   const [openTopic, setOpenTopic] = useState<Topic | null>(null);
+  // Today's Dig hides a sticker at the bottom of one topic here, if this is the day's place.
+  const daily = todaysDig();
   useEffect(() => {
     if (!openTopic) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -209,6 +212,7 @@ export default function SurfaceView({
           grounding={grounding}
           prepared={cards}
           position={compact ? undefined : TOPIC_OBJECTS[openTopic].cardPosition}
+          sticker={openTopic === daily.topic && isDailyDig(daily, exit) ? daily : undefined}
           onClose={() => setOpenTopic(null)}
         />
       )}
