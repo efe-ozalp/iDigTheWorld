@@ -8,6 +8,7 @@ import DigScene from './components/dig/DigScene';
 import { MOCK_DIGS } from './data/mock';
 import { preloadTopicObjects } from './data/topicObjects';
 import { findCard } from './lib/cards';
+import { nearestCoasts } from './lib/coast';
 import { loadDestination, type DestinationState } from './lib/destination';
 import { antipode, formatCoords } from './lib/geo';
 import { lookupPlace, type PlaceLookup } from './lib/place';
@@ -43,6 +44,9 @@ export default function App() {
   const [destination, setDestination] = useState<DestinationState>({ status: 'idle' });
   /** Numbers each dig, so a lookup that finishes late cannot land on a newer one. */
   const digRun = useRef(0);
+  // After surfacing at sea: the swim to the nearest coast, which then takes over the arrival page.
+  const [swimming, setSwimming] = useState(false);
+  const [swam, setSwam] = useState<{ to: LatLon; km: number } | null>(null);
 
   const globeRef = useRef<GlobeViewHandle>(null);
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
@@ -117,6 +121,7 @@ export default function App() {
     const run = ++digRun.current;
     setDigging(true);
     setReachedSurface(false);
+    setSwam(null);
     setDestination({ status: 'loading' });
     // Start the lookup and the picture downloads now, so the animation covers the wait.
     preloadTopicObjects();
@@ -129,16 +134,42 @@ export default function App() {
     digRun.current += 1;
     setDigging(false);
     setReachedSurface(false);
+    setSwimming(false);
     setDestination({ status: 'idle' });
   }, []);
+
+  /** From an ocean arrival, finds the nearest coast that has a name and opens its page. */
+  const swimToCoast = useCallback(async () => {
+    if (!exit || swimming) return;
+    const run = digRun.current;
+    setSwimming(true);
+    const coasts = await nearestCoasts(exit);
+    let landed: { to: LatLon; km: number; found: PlaceLookup | null } | null = null;
+    for (const coast of coasts) {
+      const found = await lookupPlace(coast.point);
+      // Keep the nearest stretch as a fallback, but prefer the first that turns out to be named land.
+      landed ??= { to: coast.point, km: coast.km, found };
+      if (found && !found.place.isOcean) {
+        landed = { to: coast.point, km: coast.km, found };
+        break;
+      }
+    }
+    if (digRun.current !== run) return;
+    setSwimming(false);
+    if (landed) {
+      setSwam({ to: landed.to, km: landed.km });
+      setDestination({ status: 'ready', found: landed.found });
+    }
+  }, [exit, swimming]);
 
   /** Back to the globe, pulled out and turned to show where the tunnel came out. */
   const showExitOnGlobe = useCallback(() => {
     endDig();
     setOriginView('review');
     setViewing('exit');
-    if (exit) globeRef.current?.flyTo(exit, 1800, 2);
-  }, [endDig, exit]);
+    const spot = swam?.to ?? exit;
+    if (spot) globeRef.current?.flyTo(spot, 1800, 2);
+  }, [endDig, exit, swam]);
 
   /** Drops the picked spot, which also frees the globe to turn again. */
   const clearSelection = useCallback(() => {
@@ -238,8 +269,13 @@ export default function App() {
 
         {surfaced && exit && (
           <SurfaceView
+            // A fresh page for the coast, so it makes its own entrance.
+            key={swam ? 'coast' : 'exit'}
             variant="arrival"
-            exit={exit}
+            exit={swam?.to ?? exit}
+            onSwim={swam ? undefined : swimToCoast}
+            swimming={swimming}
+            swamKm={swam?.km}
             place={destination.status === 'ready' ? (destination.found?.place ?? null) : null}
             facts={destination.status === 'ready' ? (destination.found?.facts ?? []) : []}
             cards={sample?.cards ?? []}

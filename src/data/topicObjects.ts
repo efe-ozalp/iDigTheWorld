@@ -36,7 +36,7 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
     oceanImage: '/objects/water-biosphere.png',
     position: { left: '48%', top: '6%', width: '19vw' },
     tilt: -3,
-    labelPosition: { right: '4%', bottom: '-13%' },
+    labelPosition: { right: '12%', bottom: '-3%' },
     cardPosition: { left: '42%', top: '33%' },
   },
   // Top right, under the two buttons.
@@ -46,7 +46,7 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
     image: '/objects/cuisine.png',
     position: { left: '78.5%', top: '13%', width: '12.5vw' },
     tilt: 6,
-    labelPosition: { left: '-16%', bottom: '4%' },
+    labelPosition: { left: '-4%', bottom: '10%' },
     cardPosition: { right: '23.5%', top: '31%' },
   },
   // Middle of the right-hand side.
@@ -56,18 +56,18 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
     image: '/objects/history.png',
     position: { left: '79.5%', top: '48%', width: '15vw' },
     tilt: -5,
-    labelPosition: { left: '-6%', bottom: '-10%' },
+    labelPosition: { left: '6%', bottom: '-1%' },
     cardPosition: { right: '22.5%', top: '36%' },
   },
-  // Lower centre right. The hands reach up from the bottom edge of the screen.
+  // Lower centre right.
   culture: {
     name: 'Culture',
     label: 'culture',
     image: '/objects/culture.png',
-    position: { left: '49%', bottom: '-1.6vw', width: '14vw' },
+    position: { left: '49%', bottom: '7%', width: '14vw' },
     tilt: 3,
-    labelPosition: { right: '-30%', top: '20%' },
-    cardPosition: { left: '42%', bottom: '25%' },
+    labelPosition: { right: '-12%', top: '26%' },
+    cardPosition: { left: '42%', bottom: '32%' },
   },
 };
 

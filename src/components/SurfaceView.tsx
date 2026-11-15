@@ -29,6 +29,12 @@ interface Props {
   onPrimary: () => void;
   /** Back to the globe to choose a different spot. */
   onDigElsewhere: () => void;
+  /** Offered on an ocean arrival: head for the nearest coast. */
+  onSwim?: () => void;
+  /** True while the nearest coast is being found. */
+  swimming?: boolean;
+  /** Set once the swim is done: how far it was. */
+  swamKm?: number;
 }
 
 const isTopic = (value: string): value is Topic => (TOPICS as readonly string[]).includes(value);
@@ -39,7 +45,19 @@ const isTopic = (value: string): value is Topic => (TOPICS as readonly string[])
  * one cut-out object per topic scattered over the picture. The photo file
  * itself is never altered; everything here is drawn on top of it.
  */
-export default function SurfaceView({ variant, exit, place, facts, cards, compact, onPrimary, onDigElsewhere }: Props) {
+export default function SurfaceView({
+  variant,
+  exit,
+  place,
+  facts,
+  cards,
+  compact,
+  onPrimary,
+  onDigElsewhere,
+  onSwim,
+  swimming = false,
+  swamKm,
+}: Props) {
   const isOrigin = variant === 'origin';
   const view = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -53,6 +71,7 @@ export default function SurfaceView({ variant, exit, place, facts, cards, compac
   const overview = place ? findCard(cards, place.name, []) : undefined;
   const notes = buildFieldNotes({
     travelled: !isOrigin,
+    swamKm,
     exit,
     place,
     facts: overview?.facts ?? facts,
@@ -97,6 +116,11 @@ export default function SurfaceView({ variant, exit, place, facts, cards, compac
       )}
 
       <div className="surface__actions">
+        {onSwim && place?.isOcean && (
+          <button type="button" className="btn btn--primary" onClick={onSwim} disabled={swimming}>
+            {swimming ? 'Swimming…' : 'Swim to nearest coast'}
+          </button>
+        )}
         <button type="button" className={isOrigin ? 'btn btn--primary' : 'btn'} onClick={onPrimary}>
           {isOrigin ? 'Dig!' : 'See it on the globe'}
         </button>
@@ -107,7 +131,15 @@ export default function SurfaceView({ variant, exit, place, facts, cards, compac
 
       <div className="surface__lead">
         <p className="surface__eyebrow">
-          {isOrigin ? (place ? 'You are in' : 'You are at') : place ? 'You surfaced in' : 'You surfaced at'}
+          {isOrigin
+            ? place
+              ? 'You are in'
+              : 'You are at'
+            : swamKm !== undefined
+              ? 'You swam ashore in'
+              : place
+                ? 'You surfaced in'
+                : 'You surfaced at'}
         </p>
         <h2 id="surface-title" className="surface__name">
           {title}
