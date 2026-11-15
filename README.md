@@ -5,10 +5,10 @@ As kids, we've all wondered what would happen if we dug straight down. Would we 
 You could say we took "let's dig in" quite literally!
 
 ## How we built it
-Front end: React, TypeScript and Vite, with react-globe.gl (three.js) for the globe. The look is modelled on 1990s illustrated encyclopedias.
-AI: Llama 4 Maverick through the Databricks Foundation Model API. Every card is written from Wikipedia text about its own subject and returned as validated JSON, and the app falls back to the encyclopedia entry if the model fails.
-Data: OpenStreetMap Nominatim for place names, Wikipedia and Wikimedia Commons for text and credited photos, and bundled Natural Earth data for naming oceans and finding coastlines.
-Hosting: a small dependency-free Node server on Databricks Apps, deployed from GitHub.
+- Front end: React, TypeScript and Vite, with react-globe.gl (three.js) for the globe. The look is modelled on 1990s illustrated encyclopedias.
+- AI: Llama 4 Maverick through the Databricks Foundation Model API. Every card is written from Wikipedia text about its own subject and returned as validated JSON, and the app falls back to the encyclopedia entry if the model fails.
+- Data: OpenStreetMap Nominatim for place names, Wikipedia and Wikimedia Commons for text and credited photos, and bundled Natural Earth data for naming oceans and finding coastlines.
+- Hosting: a small dependency-free Node server on Databricks Apps, deployed from GitHub.
 
 
 ## How to Run:
