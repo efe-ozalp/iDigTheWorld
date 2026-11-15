@@ -14,4 +14,5 @@ You could say we took "let's dig in" quite literally!
 ## How to Run:
 1. Download and install [node.js](https://nodejs.org/en/download)
 2. Install dependencies: `npm install`
-3. In terminal: `npm run dev`
+3. `npm run dev`: the whole app locally, including /api. This is the only command needed for development.
+4. `npm start`: the production server (server.js). Run npm run build first.
