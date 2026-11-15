@@ -67,7 +67,8 @@ async function articlesNear({ lat, lon }: LatLon): Promise<string[]> {
 /**
  * Finds the article that best describes a place. Tries the given titles in
  * order, then whatever Wikipedia has nearest the point. A title that turns
- * out to be about somewhere far away (another town of the same name) is skipped.
+ * out to be about somewhere far away, or about something that is not a place
+ * at all, is skipped.
  */
 export async function findArticle(point: LatLon, titles: readonly string[], maxKm: number): Promise<WikiSummary | null> {
   const tried = new Set<string>();
@@ -75,8 +76,9 @@ export async function findArticle(point: LatLon, titles: readonly string[], maxK
     if (!title || tried.has(title)) return null;
     tried.add(title);
     const summary = await wikiSummary(title);
-    if (!summary) return null;
-    if (summary.coordinates && distanceKm(point, summary.coordinates) > maxKm) return null;
+    // An article about a place says where it is. One with no coordinates is
+    // about something else that shares the name: a band, a person, a film.
+    if (!summary?.coordinates || distanceKm(point, summary.coordinates) > maxKm) return null;
     return summary;
   };
 

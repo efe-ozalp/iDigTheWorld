@@ -27,13 +27,22 @@ export interface TopicObject {
   cardPosition: CSSProperties;
 }
 
+declare const __BUILD_ID__: string;
+
+/**
+ * The pictures keep their file names when they are replaced, so each address
+ * carries the build's ID. A browser that saved the old picture sees a new
+ * address after a deploy and fetches the new one.
+ */
+const object = (file: string) => `/objects/${file}?v=${__BUILD_ID__}`;
+
 export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
   // Top centre, clear of the place name on its left.
   biosphere: {
     name: 'Biosphere',
     label: 'biosphere',
-    image: '/objects/land-biosphere.png',
-    oceanImage: '/objects/water-biosphere.png',
+    image: object('land-biosphere.png'),
+    oceanImage: object('water-biosphere.png'),
     position: { left: '48%', top: '6%', width: '19vw' },
     tilt: -3,
     labelPosition: { right: '12%', bottom: '-3%' },
@@ -43,7 +52,7 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
   cuisine: {
     name: 'Cuisine',
     label: 'cuisine',
-    image: '/objects/cuisine.png',
+    image: object('cuisine.png'),
     position: { left: '78.5%', top: '13%', width: '12.5vw' },
     tilt: 6,
     labelPosition: { left: '-4%', bottom: '10%' },
@@ -53,7 +62,7 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
   history: {
     name: 'History',
     label: 'history',
-    image: '/objects/history.png',
+    image: object('history.png'),
     position: { left: '79.5%', top: '48%', width: '15vw' },
     tilt: -5,
     labelPosition: { left: '6%', bottom: '-1%' },
@@ -63,7 +72,7 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
   culture: {
     name: 'Culture',
     label: 'culture',
-    image: '/objects/culture.png',
+    image: object('culture.png'),
     position: { left: '49%', bottom: '7%', width: '14vw' },
     tilt: 3,
     labelPosition: { right: '-12%', top: '26%' },

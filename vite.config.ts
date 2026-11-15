@@ -41,6 +41,11 @@ function devApi(): Plugin {
 
 export default defineConfig(({ isSsrBuild }) => ({
   plugins: [react(), devApi()],
+  define: {
+    // Changes with every build. Added to the addresses of images that keep their
+    // file names, so a new deploy can never be shown an old saved copy.
+    __BUILD_ID__: JSON.stringify(Date.now().toString(36)),
+  },
   build: {
     // The second build pass (server/routes.ts into dist-server/) has no use for the public folder.
     copyPublicDir: !isSsrBuild,
