@@ -30,6 +30,12 @@ interface Selection {
  */
 type OriginView = 'approach' | 'page' | 'review';
 
+/** A prepared dig's starting point, in the same shape a live lookup gives. */
+function sampleOrigin(dig: Dig): PlaceLookup {
+  const facts = [...(findCard(dig.cards, dig.origin.name, [])?.facts ?? [])];
+  return { place: dig.origin, facts, grounding: [dig.origin.summary, ...facts].join(' ') };
+}
+
 /** Never hold the zoomed-in globe longer than this waiting for a slow lookup. */
 const APPROACH_LIMIT_MS = 8000;
 
@@ -71,7 +77,7 @@ export default function App() {
   const sample = selection?.dig ?? null;
   const originKnown = sample !== null || looked?.at === origin;
   const originInfo: PlaceLookup | null = sample
-    ? { place: sample.origin, facts: [...(findCard(sample.cards, sample.origin.name, [])?.facts ?? [])] }
+    ? sampleOrigin(sample)
     : looked?.at === origin
       ? looked.found
       : null;
@@ -248,6 +254,7 @@ export default function App() {
             exit={origin}
             place={originInfo?.place ?? null}
             facts={originInfo?.facts ?? []}
+            grounding={originInfo?.grounding ?? ''}
             cards={sample?.cards ?? []}
             compact={compact}
             onPrimary={startDig}
@@ -278,6 +285,7 @@ export default function App() {
             swamKm={swam?.km}
             place={destination.status === 'ready' ? (destination.found?.place ?? null) : null}
             facts={destination.status === 'ready' ? (destination.found?.facts ?? []) : []}
+            grounding={destination.status === 'ready' ? (destination.found?.grounding ?? '') : ''}
             cards={sample?.cards ?? []}
             compact={compact}
             onPrimary={showExitOnGlobe}

@@ -32,7 +32,7 @@ For local secrets, copy `.env.example` to `.env.local`.
 1. Done. Scaffold, shared types, mock data, globe, pin drop, antipode.
 2. Done. Dig animation and its three triggers; Node server, `app.yaml` and `/api/health` for Databricks.
 3. Done. Real data: geocoding, ocean detection, photo lookup with fallbacks, surface screen, origin card. `src/lib/place.ts` looks a coordinate up and never rejects. Still to come from this list: Wikivoyage text (wanted as AI grounding, so it moves to phase 4) and bundled fallback photos for land (a land place with no photo shows the plain paper page; open water falls back to one bundled ocean photo).
-4. AI: card endpoint, prompt, validation, caching, and recursive cards opened from the topic objects.
+4. Done. AI: `/api/card` writes a card from the place, the trail and the grounding text (`ai/card.ts` holds the prompt and the validation). The browser side is `src/lib/ai.ts` (memory and `localStorage` cache, encyclopedia summary when the model fails) and `TopicCards.tsx` (the recursive cards, ending in bedrock at depth 5). Each topic's opening card is requested as soon as a place's page opens.
 5. Ocean arrival screen with details about the body of water, and "Swim to nearest land". The swim is built: an ocean arrival has a "Swim to nearest coast" button, which finds the nearest named coast from the bundled coastline (`src/lib/coast.ts`) and opens that place's page. Still to do: approximate depth and what lives there.
 6. Full styling pass to the design direction below.
 7. Demo hardening: a "Featured digs" row with pre-cached results that work with no network (Spain to New Zealand, Argentina to China, Indonesia to Colombia, Madison to the Indian Ocean).

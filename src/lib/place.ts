@@ -3,12 +3,14 @@ import { reverseGeocode } from './geocode';
 import { marineNameAt } from './ocean';
 import { findPhoto, OCEAN_FALLBACK } from './photos';
 import { localTimeIn } from './time';
-import { findArticle, sentences, wikiSummary, type WikiSummary } from './wiki';
+import { findArticle, sentences, wikiSummary, wikivoyageExtract, type WikiSummary } from './wiki';
 
 /** A place, plus short facts about it for the origin card and the field notes. */
 export interface PlaceLookup {
   place: Place;
   facts: string[];
+  /** Encyclopedia and travel-guide text about the place, for the AI cards to be written from. */
+  grounding: string;
 }
 
 /** How far an article's subject may be from the point and still count as "here". */
@@ -52,7 +54,12 @@ async function build(point: LatLon): Promise<PlaceLookup | null> {
 
   // A photo that shows the place itself; failing that, open water gets the bundled ocean view.
   const search = geo?.found ? `"${name}" ${geo.region || country}` : `"${name}"`;
-  const photo = (await findPhoto({ point, search, article })) ?? (isOcean ? OCEAN_FALLBACK : null);
+  const [found, guide] = await Promise.all([
+    findPhoto({ point, search, article }),
+    geo?.found ? wikivoyageExtract(article?.title ?? name) : Promise.resolve(null),
+  ]);
+  const photo = found ?? (isOcean ? OCEAN_FALLBACK : null);
+  const grounding = [article?.extract ?? '', guide ? `From the travel guide: ${guide}` : ''].filter(Boolean).join('\n\n').slice(0, 4000);
 
   // The opening of the article is the summary and the sentences after it are
   // the facts. A short article gives up only its first sentence as summary.
@@ -76,6 +83,7 @@ async function build(point: LatLon): Promise<PlaceLookup | null> {
       timeZone,
     },
     facts: lines.slice(lead, lead + 3),
+    grounding,
   };
 }
 

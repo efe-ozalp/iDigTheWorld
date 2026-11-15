@@ -18,5 +18,6 @@ export type DestinationState =
  */
 export async function loadDestination(exit: LatLon, dig: Dig | null): Promise<PlaceLookup | null> {
   if (!dig) return lookupPlace(exit);
-  return { place: dig.destination, facts: [...(findCard(dig.cards, dig.destination.name, [])?.facts ?? [])] };
+  const facts = [...(findCard(dig.cards, dig.destination.name, [])?.facts ?? [])];
+  return { place: dig.destination, facts, grounding: [dig.destination.summary, ...facts].join(' ') };
 }

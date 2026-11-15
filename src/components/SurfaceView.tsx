@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { TOPICS, type LatLon, type Place, type Topic, type TopicCard } from '../../shared/types';
 import { TOPIC_OBJECTS, topicObjectImage } from '../data/topicObjects';
+import { prefetchCards } from '../lib/ai';
 import { findCard } from '../lib/cards';
 import { buildFieldNotes } from '../lib/fieldNotes';
 import { formatCoords } from '../lib/geo';
 import { useLocalClock } from '../lib/useLocalClock';
 import FieldNotes from './FieldNotes';
+import TopicCards from './TopicCards';
 import TopicObject from './TopicObject';
 
 interface Props {
@@ -21,6 +23,8 @@ interface Props {
   place: Place | null;
   /** Short facts about the place, used unless a written overview card supplies its own. */
   facts: readonly string[];
+  /** Encyclopedia text about the place, which the AI cards are written from. */
+  grounding: string;
   /** Cards already written for this trip. */
   cards: readonly TopicCard[];
   /** Phone layout: a field-notes button and a row of small object icons. */
@@ -50,6 +54,7 @@ export default function SurfaceView({
   exit,
   place,
   facts,
+  grounding,
   cards,
   compact,
   onPrimary,
@@ -94,7 +99,14 @@ export default function SurfaceView({
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [openTopic]);
-  const openCard = place && openTopic ? findCard(cards, place.name, [openTopic]) : undefined;
+
+  // Start writing each topic's opening card now, so it is ready when its object is clicked.
+  const topicList = topics.join(',');
+  useEffect(() => {
+    if (!place || !topicList) return;
+    const unwritten = topicList.split(',').filter((topic) => !findCard(cards, place.name, [topic]));
+    prefetchCards(place, unwritten, grounding);
+  }, [place, topicList, grounding, cards]);
 
   const title = place?.name ?? formatCoords(exit);
   const classes = ['surface', compact && 'surface--compact', !photo && 'surface--plain'].filter(Boolean).join(' ');
@@ -179,33 +191,17 @@ export default function SurfaceView({
       {isOrigin && !compact && <p className="surface__flick">Throw your cursor down, fast, to dig</p>}
 
       {place && openTopic && (
-        <aside
-          className={`topic-plate topic-plate--${openTopic}`}
-          style={compact ? undefined : TOPIC_OBJECTS[openTopic].cardPosition}
-          aria-label={`${TOPIC_OBJECTS[openTopic].name} card`}
-        >
-          <button type="button" className="btn btn--small topic-plate__close" onClick={() => setOpenTopic(null)}>
-            Close
-          </button>
-          <p className="eyebrow">{TOPIC_OBJECTS[openTopic].name}</p>
-          {openCard ? (
-            <>
-              <h3 className="topic-plate__title">{openCard.title}</h3>
-              <p className="topic-plate__hook">{openCard.hook}</p>
-              <ol className="facts">
-                {openCard.facts.map((fact) => (
-                  <li key={fact}>{fact}</li>
-                ))}
-              </ol>
-              <p className="topic-plate__next">Dig deeper: {openCard.subtopics.join(' · ')}</p>
-            </>
-          ) : (
-            <p className="topic-plate__hook">
-              Cards about {TOPIC_OBJECTS[openTopic].label} in {place.name} are written by the AI, which arrives in
-              phase 4.
-            </p>
-          )}
-        </aside>
+        <TopicCards
+          // A fresh trail for each object.
+          key={openTopic}
+          place={place}
+          topic={openTopic}
+          topicName={TOPIC_OBJECTS[openTopic].name}
+          grounding={grounding}
+          prepared={cards}
+          position={compact ? undefined : TOPIC_OBJECTS[openTopic].cardPosition}
+          onClose={() => setOpenTopic(null)}
+        />
       )}
     </section>
   );

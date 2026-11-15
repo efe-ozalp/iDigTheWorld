@@ -47,6 +47,19 @@ export async function wikiSummary(title: string): Promise<WikiSummary | null> {
   }
 }
 
+/** The opening of the Wikivoyage travel guide for a place, when there is one. */
+export async function wikivoyageExtract(title: string): Promise<string | null> {
+  try {
+    const reply = await fetchJson<SummaryReply>(
+      `https://en.wikivoyage.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, '_'))}?redirect=true`,
+      TIMEOUT_MS,
+    );
+    return reply.type === 'standard' && reply.extract ? reply.extract : null;
+  } catch {
+    return null;
+  }
+}
+
 interface GeosearchReply {
   query?: { geosearch?: { title: string }[] };
 }
