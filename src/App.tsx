@@ -233,7 +233,7 @@ export default function App() {
         <h1 className="wordmark">
           <i>i</i>DigTheWorld
         </h1>
-        <p className="strapline">Dig a hole. See where you come out.</p>
+        <p className="strapline">What’s on the other side of the world from you?</p>
       </header>
 
       <main className="stage">
@@ -297,7 +297,7 @@ export default function App() {
             {stickers.length > 0 && <span className="passport-button__count">{stickers.length}</span>}
           </button>
         )}
-        {passportOpen && !covered && <Passport todaysPlace={today.name} onClose={closePassport} />}
+        {passportOpen && !covered && <Passport onClose={closePassport} />}
 
         {onOriginPage && origin && (
           <SurfaceView

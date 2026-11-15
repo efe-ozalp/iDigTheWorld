@@ -147,7 +147,7 @@ export default function SurfaceView({
           {isOrigin ? 'Dig!' : 'See it on the globe'}
         </button>
         <button type="button" className="btn" onClick={onDigElsewhere}>
-          {isOrigin ? 'Pick another spot' : 'Dig somewhere else'}
+          {isOrigin ? 'Return to world view' : 'Dig somewhere else'}
         </button>
       </div>
 

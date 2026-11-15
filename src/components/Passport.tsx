@@ -2,8 +2,6 @@ import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, ty
 import { moveSticker, STICKER_BOUNDS, usePassport, type PassportSticker } from '../lib/passport';
 
 interface Props {
-  /** The day's place, named when the passport is still empty. */
-  todaysPlace: string;
   onClose: () => void;
 }
 
@@ -17,7 +15,7 @@ const NUDGE = 0.02;
  * be dragged (or moved with the arrow keys) to anywhere on the two pages, and
  * stays where it is put.
  */
-export default function Passport({ todaysPlace, onClose }: Props) {
+export default function Passport({ onClose }: Props) {
   const stickers = usePassport();
   const pages = useRef<HTMLDivElement>(null);
   const close = useRef<HTMLButtonElement>(null);
@@ -36,28 +34,16 @@ export default function Passport({ todaysPlace, onClose }: Props) {
       <section className="passport" role="dialog" aria-modal="true" aria-label="Your passport">
         <div className="passport__pages" ref={pages}>
           <div className="passport__page">
-            <p className="eyebrow">iDigTheWorld</p>
             <h2 className="passport__title">Passport</h2>
-            <p className="passport__lede">The explorer’s sticker pages</p>
-            {stickers.length > 0 ? (
+            {stickers.length > 0 && (
               <ol className="passport__entries">
                 {stickers.map((sticker) => (
                   <li key={sticker.id}>{sticker.place}</li>
                 ))}
               </ol>
-            ) : (
-              <p className="passport__empty">
-                No stickers yet. Today’s Dig is {todaysPlace}: one is stuck to a card there, five layers down.
-              </p>
             )}
           </div>
-          <div className="passport__page passport__page--right">
-            <p className="passport__tip">
-              {stickers.length > 0
-                ? 'Drag a sticker to stick it anywhere on these two pages.'
-                : 'Stickers you peel off on your digs are kept here.'}
-            </p>
-          </div>
+          <div className="passport__page passport__page--right" />
 
           {stickers.map((sticker) => (
             <PlacedSticker key={sticker.id} sticker={sticker} pages={pages} />

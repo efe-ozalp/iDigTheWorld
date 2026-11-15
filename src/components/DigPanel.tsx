@@ -88,7 +88,7 @@ export default function DigPanel({
                 {viewing === 'origin' ? 'See the other side' : 'Back to my explorer'}
               </button>
               <button type="button" className="btn" onClick={onClose}>
-                Pick another spot
+                Return to world view
               </button>
             </div>
           </div>

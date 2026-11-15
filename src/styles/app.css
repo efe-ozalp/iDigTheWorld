@@ -1638,8 +1638,8 @@ button {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
-  padding: 0.3rem 0.85rem 0.35rem;
-  font-size: 0.95rem;
+  padding: 0.4rem 1.05rem 0.45rem;
+  font-size: 1.2rem;
   background: var(--card);
   border: 1px solid var(--rule);
   border-left: 5px solid var(--sun);
@@ -1666,7 +1666,7 @@ button {
 .today__found {
   margin-left: 0.3rem;
   padding: 0 0.45rem;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1905,26 +1905,11 @@ button {
   color: #1b2f63;
 }
 
-.passport__lede,
-.passport__tip,
-.passport__empty {
-  font-style: italic;
-  color: var(--ink-soft);
-}
-
 .passport__entries {
   margin-top: auto;
   padding-left: 1.3rem;
   font-size: 0.95rem;
   color: var(--ink-soft);
-}
-
-.passport__empty {
-  margin-top: auto;
-}
-
-.passport__tip {
-  text-align: right;
 }
 
 .passport__close {
