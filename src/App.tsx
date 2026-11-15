@@ -36,6 +36,9 @@ function sampleOrigin(dig: Dig): PlaceLookup {
   return { place: dig.origin, facts, grounding: [dig.origin.summary, ...facts].join(' ') };
 }
 
+/** How long the starting page takes to lift away before the dig begins. Matches surface-leave in app.css. */
+const LEAVE_MS = 900;
+
 /** Never hold the zoomed-in globe longer than this waiting for a slow lookup. */
 const APPROACH_LIMIT_MS = 8000;
 
@@ -53,6 +56,9 @@ export default function App() {
   // After surfacing at sea: the swim to the nearest coast, which then takes over the arrival page.
   const [swimming, setSwimming] = useState(false);
   const [swam, setSwam] = useState<{ to: LatLon; km: number } | null>(null);
+  // The moment between triggering a dig and the dig itself, while the page lifts away.
+  const [leaving, setLeaving] = useState(false);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const globeRef = useRef<GlobeViewHandle>(null);
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
@@ -96,11 +102,6 @@ export default function App() {
     };
   }, [selection, reducedMotion]);
 
-  const approaching = selection !== null && originView === 'approach' && !(zoomDone && (originKnown || waitedEnough));
-  const onOriginPage = selection !== null && !digging && originView !== 'review' && !approaching;
-  const reviewing = selection !== null && !digging && originView === 'review';
-  const surfaced = digging && reachedSurface && destination.status === 'ready';
-
   const select = useCallback((next: Selection) => {
     setSelection(next);
     setOriginView('approach');
@@ -115,6 +116,11 @@ export default function App() {
     [select],
   );
 
+  const approaching = selection !== null && originView === 'approach' && !(zoomDone && (originKnown || waitedEnough));
+  const onOriginPage = selection !== null && !digging && originView !== 'review' && !approaching;
+  const reviewing = selection !== null && !digging && originView === 'review';
+  const surfaced = digging && reachedSurface && destination.status === 'ready';
+
   const toggleView = useCallback(() => {
     if (!origin || !exit) return;
     const next: Side = viewing === 'origin' ? 'exit' : 'origin';
@@ -123,21 +129,32 @@ export default function App() {
   }, [origin, exit, viewing]);
 
   const startDig = useCallback(() => {
-    if (!selection || !exit || digging) return;
+    if (!selection || !exit || digging || leaving) return;
     const run = ++digRun.current;
-    setDigging(true);
     setReachedSurface(false);
     setSwam(null);
     setDestination({ status: 'loading' });
+    // From the spot's own page, break ground first: the page lifts away for a moment.
+    if (onOriginPage && !reducedMotion) {
+      setLeaving(true);
+      leaveTimer.current = setTimeout(() => {
+        setLeaving(false);
+        setDigging(true);
+      }, LEAVE_MS);
+    } else {
+      setDigging(true);
+    }
     // Start the lookup and the picture downloads now, so the animation covers the wait.
     preloadTopicObjects();
     void loadDestination(exit, selection.dig).then((found) => {
       if (digRun.current === run) setDestination({ status: 'ready', found });
     });
-  }, [selection, exit, digging]);
+  }, [selection, exit, digging, leaving, onOriginPage, reducedMotion]);
 
   const endDig = useCallback(() => {
     digRun.current += 1;
+    clearTimeout(leaveTimer.current);
+    setLeaving(false);
     setDigging(false);
     setReachedSurface(false);
     setSwimming(false);
@@ -248,9 +265,13 @@ export default function App() {
           onClose={clearSelection}
         />
 
+        {/* Plain paper behind a page that is lifting away or coming up, so the globe never shows through. */}
+        {(leaving || surfaced) && <div className="ground" />}
+
         {onOriginPage && origin && (
           <SurfaceView
             variant="origin"
+            leaving={leaving}
             exit={origin}
             place={originInfo?.place ?? null}
             facts={originInfo?.facts ?? []}

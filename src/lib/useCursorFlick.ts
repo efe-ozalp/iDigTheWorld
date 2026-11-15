@@ -1,21 +1,22 @@
 import { useEffect, useRef } from 'react';
 
-/** Only movement in the lower part of the screen counts. */
-const ZONE_TOP = 0.5;
+/** The throw has to carry the cursor into this strip along the bottom edge of the screen. */
+const ZONE_TOP = 0.9;
 /** A flick covers at least this far, this fast, within the sampling window. */
-const MIN_DISTANCE_PX = 110;
-const MIN_SPEED_PX_PER_MS = 2;
-const WINDOW_MS = 120;
+const MIN_DISTANCE_PX = 240;
+const MIN_SPEED_PX_PER_MS = 2.6;
+const WINDOW_MS = 110;
 /** Sideways movement allowed, as a share of the downward distance. */
-const MAX_DRIFT = 0.6;
+const MAX_DRIFT = 0.35;
 /** Ignore the first moments, so the motion that opened the page cannot count. */
 const ARM_DELAY_MS = 700;
 
 /**
- * While armed, calls onFlick when the mouse cursor is thrown quickly downward
- * in the lower half of the screen. No button is pressed: it is the speed of
- * the cursor alone. Movement over the field-notes scroll or an open card is
- * ignored, so reaching for those never counts.
+ * While armed, calls onFlick when the mouse cursor is thrown hard downward,
+ * all the way into a thin strip along the bottom edge of the screen. No
+ * button is pressed: it is the speed of the cursor alone. It is deliberately
+ * hard to do by accident: reaching for an object, the scroll or a card, or
+ * reading one, never counts.
  */
 export function useCursorFlick(armed: boolean, onFlick: () => void): void {
   const onFlickRef = useRef(onFlick);
@@ -34,7 +35,7 @@ export function useCursorFlick(armed: boolean, onFlick: () => void): void {
       const now = performance.now();
       if (now < armedAt) return;
       const target = event.target instanceof Element ? event.target : null;
-      if (target?.closest('.scroll, .topic-plate')) {
+      if (target?.closest('.scroll, .topic-plate, .object, .object-fallback')) {
         trail = [];
         return;
       }

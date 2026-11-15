@@ -859,6 +859,104 @@ button {
   }
 }
 
+/* Breaking ground: the starting page lifts away upward, as if the view were sinking into the earth. */
+.surface--leaving {
+  animation: surface-leave 0.9s cubic-bezier(0.55, 0, 0.85, 0.35) both;
+}
+
+@keyframes surface-leave {
+  to {
+    transform: translateY(-104%);
+  }
+}
+
+/* The same in reverse, and gentler, for coming up at the far end. */
+.surface--emerging {
+  animation: surface-emerge 1.1s cubic-bezier(0.2, 0.75, 0.3, 1) both;
+}
+
+@keyframes surface-emerge {
+  from {
+    opacity: 0.4;
+    transform: translateY(-104%);
+  }
+}
+
+/* What shows behind a page on the move. */
+.ground {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  background: var(--paper);
+}
+
+/* Soil or spray thrown up from the bottom of the screen. */
+.burst {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.burst span {
+  position: absolute;
+  bottom: -1.5rem;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  background: var(--bit);
+  border-radius: 42% 58% 47% 53% / 55% 45% 58% 42%;
+  opacity: 0;
+  animation: burst-fly 0.85s cubic-bezier(0.15, 0.7, 0.3, 1) var(--delay) both;
+}
+
+@keyframes burst-fly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--drift), calc(-1 * var(--rise))) rotate(var(--spin));
+  }
+}
+
+.burst--dirt span {
+  --bit: #6b4a2a;
+}
+
+.burst--dirt span:nth-child(3n) {
+  --bit: #8f6f48;
+}
+
+.burst--dirt span:nth-child(4n) {
+  --bit: #3d2a17;
+}
+
+.burst--water span {
+  --bit: #86c4ee;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+}
+
+.burst--water span:nth-child(3n) {
+  --bit: #e2f3ff;
+}
+
+.burst--water span:nth-child(4n) {
+  --bit: #4f9fd8;
+}
+
+/* Arrival: the same bits, played backwards so they settle, and fainter. */
+.burst--settle span {
+  animation-duration: 1.1s;
+  animation-direction: reverse;
+  filter: opacity(0.65);
+}
+
 /* Holds the photo and its scrims, and trims the photo's slow zoom at the edges. */
 .surface__backdrop {
   position: absolute;
@@ -1581,6 +1679,10 @@ button {
   .surface,
   .surface__photo {
     animation: none;
+  }
+
+  .burst {
+    display: none;
   }
 
   /* No unrolling: the scroll is simply shown or hidden. */

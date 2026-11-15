@@ -6,6 +6,7 @@ import { findCard } from '../lib/cards';
 import { buildFieldNotes } from '../lib/fieldNotes';
 import { formatCoords } from '../lib/geo';
 import { useLocalClock } from '../lib/useLocalClock';
+import Burst from './Burst';
 import FieldNotes from './FieldNotes';
 import TopicCards from './TopicCards';
 import TopicObject from './TopicObject';
@@ -39,6 +40,8 @@ interface Props {
   swimming?: boolean;
   /** Set once the swim is done: how far it was. */
   swamKm?: number;
+  /** True for the moment after the dig is triggered: the page lifts away and soil or spray flies up. */
+  leaving?: boolean;
 }
 
 const isTopic = (value: string): value is Topic => (TOPICS as readonly string[]).includes(value);
@@ -62,6 +65,7 @@ export default function SurfaceView({
   onSwim,
   swimming = false,
   swamKm,
+  leaving = false,
 }: Props) {
   const isOrigin = variant === 'origin';
   const view = useRef<HTMLElement>(null);
@@ -109,7 +113,18 @@ export default function SurfaceView({
   }, [place, topicList, grounding, cards]);
 
   const title = place?.name ?? formatCoords(exit);
-  const classes = ['surface', compact && 'surface--compact', !photo && 'surface--plain'].filter(Boolean).join(' ');
+  // An arrival by tunnel comes up through the ground; a swim ashore just appears.
+  const emerging = !isOrigin && swamKm === undefined;
+  const ground = place?.isOcean ? 'water' : 'dirt';
+  const classes = [
+    'surface',
+    compact && 'surface--compact',
+    !photo && 'surface--plain',
+    leaving && 'surface--leaving',
+    emerging && 'surface--emerging',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <section
@@ -188,7 +203,9 @@ export default function SurfaceView({
         </p>
       )}
 
-      {isOrigin && !compact && <p className="surface__flick">Throw your cursor down, fast, to dig</p>}
+      {isOrigin && !compact && <p className="surface__flick">Throw your cursor hard at the bottom edge to dig</p>}
+      {leaving && <Burst kind={ground} />}
+      {emerging && <Burst kind={ground} settle />}
 
       {place && openTopic && (
         <TopicCards
