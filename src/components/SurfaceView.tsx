@@ -40,7 +40,7 @@ interface Props {
   swimming?: boolean;
   /** Set once the swim is done: how far it was. */
   swamKm?: number;
-  /** True for the moment after the dig is triggered: the page lifts away and soil or spray flies up. */
+  /** True for the moment after the dig is triggered, while soil or spray flies up. */
   leaving?: boolean;
 }
 
@@ -116,15 +116,7 @@ export default function SurfaceView({
   // An arrival by tunnel comes up through the ground; a swim ashore just appears.
   const emerging = !isOrigin && swamKm === undefined;
   const ground = place?.isOcean ? 'water' : 'dirt';
-  const classes = [
-    'surface',
-    compact && 'surface--compact',
-    !photo && 'surface--plain',
-    leaving && 'surface--leaving',
-    emerging && 'surface--emerging',
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const classes = ['surface', compact && 'surface--compact', !photo && 'surface--plain'].filter(Boolean).join(' ');
 
   return (
     <section

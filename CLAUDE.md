@@ -50,7 +50,7 @@ For local secrets, copy `.env.example` to `.env.local`.
 
 Interaction decisions:
 
-- On the origin page the dig starts when the mouse cursor is thrown quickly downward in the lower half of the screen, with no button pressed (`src/lib/useCursorFlick.ts`). It is deliberately hard to trigger: the throw must be fast and long and end in a thin strip along the bottom edge, so reading or reaching for an object never starts a dig. When it fires, the page lifts away upward while soil (or spray, at sea) flies up, and the arrival plays the same thing gently in reverse. The Dig! button, the down-arrow key and a press-and-drag flick (the touch gesture) also start it.
+- On the origin page the dig starts when the mouse cursor is thrown quickly downward in the lower half of the screen, with no button pressed (`src/lib/useCursorFlick.ts`). It is deliberately hard to trigger: the throw must be fast and long and end in a thin strip along the bottom edge, so reading or reaching for an object never starts a dig. When a dig starts, soil (or spray, at sea) flies up from the bottom of the screen for a moment, and an arrival plays the same particles gently in reverse. The page itself does not move. The Dig! button, the down-arrow key and a press-and-drag flick (the touch gesture) also start it.
 - While a pin is down and the origin card is open, globe rotation is locked, so a downward flick anywhere on screen starts the dig. It unlocks when the card closes or a new spot is picked.
 - Start every destination fetch (geocode, photo, AI) the moment the dig begins, so the animation hides the latency.
 - `prefers-reduced-motion` gets a shorter, simpler dig.

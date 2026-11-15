@@ -43,19 +43,23 @@ async function build(point: LatLon): Promise<PlaceLookup | null> {
   const country = geo?.found ? geo.country : unnamedLand && point.lat < -60 ? 'Antarctica' : '';
   const name = geo?.found ? geo.name : (sea ?? (country || 'Uncharted land'));
 
+  // The place's own article where it has one. Failing that the text comes from
+  // its country's article, but that article's pictures are not pictures of here.
+  let own: WikiSummary | null;
   let article: WikiSummary | null;
   if (geo?.found) {
     const { region, wikipediaTitle } = geo;
     const titles = [wikipediaTitle ?? '', name, region ? `${name}, ${region}` : '', `${name}, ${country}`];
-    article = (await findArticle(point, titles, NEARBY_KM)) ?? (await wikiSummary(country));
+    own = await findArticle(point, titles, NEARBY_KM);
+    article = own ?? (await wikiSummary(country));
   } else {
-    article = sea || country ? await wikiSummary(sea ?? country) : null;
+    own = sea || country ? await wikiSummary(sea ?? country) : null;
+    article = own;
   }
 
   // A photo that shows the place itself; failing that, open water gets the bundled ocean view.
-  const search = geo?.found ? `"${name}" ${geo.region || country}` : `"${name}"`;
   const [found, guide] = await Promise.all([
-    findPhoto({ point, search, article }),
+    findPhoto({ point, name, region: geo?.found ? geo.region : '', country, article: own }),
     geo?.found ? wikivoyageExtract(article?.title ?? name) : Promise.resolve(null),
   ]);
   const photo = found ?? (isOcean ? OCEAN_FALLBACK : null);

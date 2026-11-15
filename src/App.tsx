@@ -36,8 +36,8 @@ function sampleOrigin(dig: Dig): PlaceLookup {
   return { place: dig.origin, facts, grounding: [dig.origin.summary, ...facts].join(' ') };
 }
 
-/** How long the starting page takes to lift away before the dig begins. Matches surface-leave in app.css. */
-const LEAVE_MS = 900;
+/** How long the soil or spray flies before the dig begins. A little under burst-fly in app.css. */
+const LEAVE_MS = 750;
 
 /** Never hold the zoomed-in globe longer than this waiting for a slow lookup. */
 const APPROACH_LIMIT_MS = 8000;
@@ -56,7 +56,7 @@ export default function App() {
   // After surfacing at sea: the swim to the nearest coast, which then takes over the arrival page.
   const [swimming, setSwimming] = useState(false);
   const [swam, setSwam] = useState<{ to: LatLon; km: number } | null>(null);
-  // The moment between triggering a dig and the dig itself, while the page lifts away.
+  // The moment between triggering a dig and the dig itself, while soil or spray flies up.
   const [leaving, setLeaving] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -134,7 +134,7 @@ export default function App() {
     setReachedSurface(false);
     setSwam(null);
     setDestination({ status: 'loading' });
-    // From the spot's own page, break ground first: the page lifts away for a moment.
+    // From the spot's own page, break ground first: soil or spray flies up for a moment.
     if (onOriginPage && !reducedMotion) {
       setLeaving(true);
       leaveTimer.current = setTimeout(() => {
@@ -264,9 +264,6 @@ export default function App() {
           onToggleView={toggleView}
           onClose={clearSelection}
         />
-
-        {/* Plain paper behind a page that is lifting away or coming up, so the globe never shows through. */}
-        {(leaving || surfaced) && <div className="ground" />}
 
         {onOriginPage && origin && (
           <SurfaceView

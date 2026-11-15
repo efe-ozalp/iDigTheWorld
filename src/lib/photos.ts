@@ -47,28 +47,37 @@ const plain = (html: string | undefined) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-/** File names that give away a map, flag, chart or other non-photograph. */
+/** File names that give away a map, flag, chart, scan or other non-view. */
 const NOT_A_VIEW =
-  /map|flag|locat|coat[_ ]of|emblem|seal[_ ]of|logo|icon|diagram|chart|graph|symbol|blason|wappen|orthographic|relief|topograph|bathymetr|\bcia\b|ortelius|mercator|atlas|carte|karte|mappa|maris|projection|visuali|modis|currents|gyre|monsoon|plates?[_ ]|portrait/i;
+  /map|flag|locat|coat[_ ]of|emblem|seal[_ ]of|logo|icon|diagram|chart|graph|symbol|blason|wappen|orthographic|relief|topograph|bathymetr|\bcia\b|ortelius|mercator|atlas|carte|karte|mappa|maris|projection|visuali|modis|currents|gyre|monsoon|plates?[_ ]|portrait|earthquake|seismic|velocit|insar|sentinel|landsat|radar|infograph|scheme|poster|stamp|banknote|\bcoin|manuscript|newspaper|screenshot|census|population|election|\bplot\b/i;
 
 /** The same giveaways in a file's description or author line, where only whole words are safe to match. */
-const DESCRIBED_AS_MAP = /\b(map|maps|chart|diagram|visuali[sz]ation|engraving|painting|painted|drawing|illustration|lithograph)\b/i;
+const DESCRIBED_AS_NOT_A_VIEW =
+  /\b(map|maps|chart|diagram|visuali[sz]ation|engraving|painting|painted|drawing|illustration|lithograph|figure|graph|plot|velocities|interferogram|satellite image|earthquakes?|portrait|close-?up|macro|logo|poster|scan|scanned)\b/i;
 
 /**
  * Astronaut photographs are tagged with the point below the spacecraft, so a
  * search by coordinates returns them for places they do not show.
  */
-const FROM_ORBIT = /Earth Science and Remote Sensing|Johnson Space Center|^File:ISS[-\d]|^File:STS[-\d]/i;
+const FROM_ORBIT = /Earth Science and Remote Sensing|Johnson Space Center|^File:ISS[-\d]|^File:STS[-\d]|\bNASA\b|\bESA\b/i;
 
-/** A photograph that will fill a wide screen: a reasonably large landscape JPEG of a real view. */
-function suitable(page: CommonsPage, info: ImageInfo, allowOrbit: boolean): boolean {
+/** Words that mark a picture as a view of a place, not of a thing that happens to be there. */
+const SCENIC =
+  /view|panoram|skyline|landscape|street|town|village|city|lake|river|mountain|hill|valley|beach|coast|harbou?r|\bport\b|bridge|square|plaza|\bpark\b|forest|field|farm|road|church|mosque|temple|cathedral|castle|palace|tower|station|market|downtown|aerial|sunset|sunrise|countryside|canyon|desert|island|\bbay\b|waterfall|glacier|volcano|ruins|monument|courthouse|savanna|plain|plateau|steppe|dunes?|cliff|gorge|reef|lagoon|rainforest|jungle|pasture|vineyard|terrace|oasis|fjord|wetland|marsh|prairie|highway|rooftop|old town|centre|center|falls|creek|stream|pond|shore|\bsea\b|ocean|\bdam\b|cove|peak|ridge|summit|woods|grove|garden|meadow|trail|lookout|scenery|nature reserve|national park/i;
+
+const words = (page: CommonsPage, info: ImageInfo) =>
+  `${page.title} ${plain(info.extmetadata?.ImageDescription?.value).slice(0, 300)}`;
+
+/** Large, wide, a JPEG, and not a map, scan, artwork or close-up by its name, author or description. */
+function usable(page: CommonsPage, info: ImageInfo): boolean {
   const shape = info.width / info.height;
   if (info.mime !== 'image/jpeg' || info.width < 1000 || shape < 1.15 || shape > 2.6) return false;
   if (NOT_A_VIEW.test(page.title)) return false;
-  const described = `${plain(info.extmetadata?.Artist?.value)} ${plain(info.extmetadata?.ImageDescription?.value).slice(0, 200)}`;
-  if (DESCRIBED_AS_MAP.test(described)) return false;
-  return allowOrbit || !FROM_ORBIT.test(`${page.title} ${plain(info.extmetadata?.Artist?.value)}`);
+  const described = `${plain(info.extmetadata?.Artist?.value)} ${plain(info.extmetadata?.ImageDescription?.value).slice(0, 300)}`;
+  return !DESCRIBED_AS_NOT_A_VIEW.test(described);
 }
+
+const fromOrbit = (page: CommonsPage, info: ImageInfo) => FROM_ORBIT.test(`${page.title} ${plain(info.extmetadata?.Artist?.value)}`);
 
 function toPhoto(info: ImageInfo): Photo {
   const author = plain(info.extmetadata?.Artist?.value).slice(0, 70) || 'unknown author';
@@ -87,95 +96,157 @@ async function commons(query: string): Promise<CommonsPage[]> {
 
 const normal = (title: string) => decodeURIComponent(title).replace(/_/g, ' ');
 
-/** The first of the named Commons files, in the order given, that makes a good backdrop. */
-async function firstSuitableFile(files: readonly string[]): Promise<Photo | null> {
-  const titles = [...new Set(files.map(normal))].filter((t) => /\.jpe?g$/i.test(t) && !NOT_A_VIEW.test(t)).slice(0, 12);
+/** The Commons file behind an image address, or null if it is hosted elsewhere (and so probably non-free). */
+function commonsFile(imageUrl: string | undefined): string | null {
+  if (!imageUrl) return null;
+  try {
+    const parts = new URL(imageUrl).pathname.split('/');
+    const at = parts.indexOf('commons');
+    const file = at === -1 ? undefined : parts[at + 1] === 'thumb' ? parts[at + 4] : parts[at + 3];
+    return file ? `File:${file}` : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The first of the named Commons files, in the order given, that is usable. */
+async function firstUsableFile(files: readonly (string | null)[]): Promise<Photo | null> {
+  const titles = [...new Set(files.filter((f): f is string => !!f).map(normal))]
+    .filter((t) => /\.jpe?g$/i.test(t) && !NOT_A_VIEW.test(t))
+    .slice(0, 12);
   if (titles.length === 0) return null;
   const pages = await commons(`titles=${encodeURIComponent(titles.join('|'))}`);
   for (const title of titles) {
     const page = pages.find((p) => p.title === title);
     const info = page?.imageinfo?.[0];
-    if (page && info && suitable(page, info, true)) return toPhoto(info);
+    if (page && info && usable(page, info)) return toPhoto(info);
   }
   return null;
 }
 
-/** Source 1: the photographs used in the place's own Wikipedia article, lead image first. */
-async function fromArticle(articleTitle: string, leadImageUrl: string | undefined): Promise<Photo | null> {
-  const files: string[] = [];
-  if (leadImageUrl) {
-    // Only images hosted on Commons qualify; ones uploaded to Wikipedia itself are usually non-free.
-    const parts = new URL(leadImageUrl).pathname.split('/');
-    const at = parts.indexOf('commons');
-    const file = at === -1 ? undefined : parts[at + 1] === 'thumb' ? parts[at + 4] : parts[at + 3];
-    if (file) files.push(`File:${file}`);
-  }
-  try {
-    const media = await fetchJson<{ items?: { title?: string; type?: string }[] }>(
-      `https://en.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(articleTitle.replace(/ /g, '_'))}`,
-      TIMEOUT_MS,
-    );
-    for (const item of media.items ?? []) if (item.type === 'image' && item.title) files.push(item.title);
-  } catch {
-    // The lead image, if any, is still worth trying.
-  }
-  return firstSuitableFile(files);
+interface SummaryReply {
+  type?: string;
+  originalimage?: { source: string };
+  wikibase_item?: string;
 }
 
-/** Source 2: the image Wikidata records for the place (property P18). */
-async function fromWikidata(entity: string): Promise<Photo | null> {
+async function wikidataImage(entity: string): Promise<string | null> {
   const reply = await fetchJson<{ claims?: { P18?: { mainsnak?: { datavalue?: { value?: string } } }[] } }>(
     `https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&origin=*&property=P18&entity=${encodeURIComponent(entity)}`,
     TIMEOUT_MS,
   );
-  const files = (reply.claims?.P18 ?? []).map((c) => c.mainsnak?.datavalue?.value).filter((f): f is string => !!f);
-  return firstSuitableFile(files.map((f) => `File:${f}`));
+  const file = reply.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+  return file ? `File:${file}` : null;
 }
 
-/** Source 3: photos on Commons taken within 10 km of the point, sharpest first. Never ones taken from orbit. */
-async function fromNearby({ lat, lon }: LatLon): Promise<Photo | null> {
-  const pages = await commons(`generator=geosearch&ggsnamespace=6&ggsradius=10000&ggslimit=30&ggscoord=${lat.toFixed(4)}%7C${lon.toFixed(4)}`);
-  const best = pages
-    .filter((page) => page.imageinfo?.[0] && suitable(page, page.imageinfo[0], false))
-    .sort((a, b) => b.imageinfo![0].width * b.imageinfo![0].height - a.imageinfo![0].width * a.imageinfo![0].height)[0];
-  return best ? toPhoto(best.imageinfo![0]) : null;
+/** The photographs used in the place's own Wikipedia article: lead image, Wikidata image, then the rest. */
+async function fromOwnArticle(article: NonNullable<PhotoQuery['article']>): Promise<Photo | null> {
+  const files: (string | null)[] = [commonsFile(article.imageUrl)];
+  if (article.wikidataId) files.push(await wikidataImage(article.wikidataId).catch(() => null));
+  try {
+    const media = await fetchJson<{ items?: { title?: string; type?: string }[] }>(
+      `https://en.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(article.title.replace(/ /g, '_'))}`,
+      TIMEOUT_MS,
+    );
+    for (const item of media.items ?? []) if (item.type === 'image' && item.title) files.push(item.title);
+  } catch {
+    // The lead image is still worth trying.
+  }
+  return firstUsableFile(files);
 }
 
-/** Source 4: a search of Commons for the place's name, best match first. */
-async function fromSearch(terms: string): Promise<Photo | null> {
-  const pages = await commons(`generator=search&gsrnamespace=6&gsrlimit=20&gsrsearch=${encodeURIComponent(`${terms} filetype:bitmap`)}`);
-  pages.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
-  const hit = pages.find((page) => page.imageinfo?.[0] && suitable(page, page.imageinfo[0], false));
-  return hit ? toPhoto(hit.imageinfo![0]) : null;
+/**
+ * Commons pictures taken near the point or found by name. Anything can be
+ * geotagged to a place (a pair of hands, a dinner plate), so a picture only
+ * counts if its name or description mentions the place or reads as a view.
+ */
+function bestView(pages: CommonsPage[], names: readonly string[]): Photo | null {
+  const lowered = names.filter(Boolean).map((n) => n.toLowerCase());
+  const scored = pages
+    .map((page) => {
+      const info = page.imageinfo?.[0];
+      if (!info || !usable(page, info) || fromOrbit(page, info)) return null;
+      const text = words(page, info).toLowerCase();
+      const named = lowered.some((n) => text.includes(n));
+      const scenic = SCENIC.test(text);
+      if (!named && !scenic) return null;
+      return { info, score: (named ? 2 : 0) + (scenic ? 1 : 0), pixels: info.width * info.height };
+    })
+    .filter((hit): hit is NonNullable<typeof hit> => hit !== null)
+    .sort((a, b) => b.score - a.score || b.pixels - a.pixels);
+  return scored[0] ? toPhoto(scored[0].info) : null;
+}
+
+async function fromNearby({ lat, lon }: LatLon, names: readonly string[]): Promise<Photo | null> {
+  const pages = await commons(`generator=geosearch&ggsnamespace=6&ggsradius=10000&ggslimit=40&ggscoord=${lat.toFixed(4)}%7C${lon.toFixed(4)}`);
+  return bestView(pages, names);
+}
+
+async function fromSearch(terms: string, names: readonly string[]): Promise<Photo | null> {
+  const pages = await commons(`generator=search&gsrnamespace=6&gsrlimit=30&gsrsearch=${encodeURIComponent(`${terms} filetype:bitmap`)}`);
+  return bestView(pages, names);
+}
+
+/**
+ * The picture that stands for a wider area (a province, a country): the lead
+ * image of its Wikipedia article, its Wikidata image, or the lead image of
+ * its Wikivoyage guide. Only these curated pictures are used, never whatever
+ * else the article happens to contain.
+ */
+async function fromWiderArea(title: string): Promise<Photo | null> {
+  const files: (string | null)[] = [];
+  const page = encodeURIComponent(title.replace(/ /g, '_'));
+  const [pedia, voyage] = await Promise.all([
+    fetchJson<SummaryReply>(`https://en.wikipedia.org/api/rest_v1/page/summary/${page}?redirect=true`, TIMEOUT_MS).catch(() => null),
+    fetchJson<SummaryReply>(`https://en.wikivoyage.org/api/rest_v1/page/summary/${page}?redirect=true`, TIMEOUT_MS).catch(() => null),
+  ]);
+  files.push(commonsFile(pedia?.originalimage?.source));
+  if (pedia?.wikibase_item) files.push(await wikidataImage(pedia.wikibase_item).catch(() => null));
+  files.push(commonsFile(voyage?.originalimage?.source));
+  return firstUsableFile(files);
 }
 
 export interface PhotoQuery {
   point: LatLon;
-  /** Words to search Commons for: the place's name, with its region or country to tell namesakes apart. */
-  search: string;
-  /** The place's Wikipedia article, when one was found. */
+  /** The place's name. */
+  name: string;
+  /** The province or state it is in, and its country; empty when unknown or at sea. */
+  region: string;
+  country: string;
+  /** The place's own Wikipedia article, when it has one. Not a stand-in such as its country's. */
   article?: { title: string; imageUrl?: string; wikidataId?: string } | null;
 }
 
 /**
- * Finds a photograph that actually shows the place. Tries, in order: the
- * place's Wikipedia article, its Wikidata image, Commons photos taken nearby,
- * and a Commons search for its name. Each source that fails or times out is
- * skipped. Resolves with null when none has a usable photo.
+ * Finds a photograph for a place, preferring one of the place itself and
+ * widening step by step so that almost every place gets a relevant picture:
+ *
+ *   1. the photographs in the place's own Wikipedia article
+ *   2. Commons pictures taken within 10 km that show a view or name the place
+ *   3. a Commons search for the place by name
+ *   4. the picture that stands for its province or state
+ *   5. the picture that stands for its country
+ *   6. a Commons search for the country's landscape
+ *
+ * Each step that fails or times out is skipped. Resolves with null when none
+ * has a usable photo.
  */
-export async function findPhoto({ point, search, article }: PhotoQuery): Promise<Photo | null> {
-  const sources: (() => Promise<Photo | null>)[] = [
-    () => (article ? fromArticle(article.title, article.imageUrl) : Promise.resolve(null)),
-    () => (article?.wikidataId ? fromWikidata(article.wikidataId) : Promise.resolve(null)),
-    () => fromNearby(point),
-    () => fromSearch(search),
+export async function findPhoto({ point, name, region, country, article }: PhotoQuery): Promise<Photo | null> {
+  const names = [name, region];
+  const steps: (() => Promise<Photo | null>)[] = [
+    () => (article ? fromOwnArticle(article) : Promise.resolve(null)),
+    () => fromNearby(point, names),
+    () => fromSearch(`"${name}" ${region || country}`.trim(), [name]),
+    () => (region ? fromWiderArea(region) : Promise.resolve(null)),
+    () => (country ? fromWiderArea(country) : Promise.resolve(null)),
+    () => (country ? fromSearch(`${country} landscape`, [country]) : Promise.resolve(null)),
   ];
-  for (const source of sources) {
+  for (const step of steps) {
     try {
-      const photo = await source();
+      const photo = await step();
       if (photo) return photo;
     } catch {
-      // Try the next source.
+      // Try the next step.
     }
   }
   return null;
