@@ -157,12 +157,11 @@ async function serveStatic(req, res, pathname) {
   const stats = file ? await statFile(file) : null;
 
   if (file && stats) {
-    // Vite fingerprints everything under /assets, so those never change.
-    const cacheControl = pathname.startsWith('/assets/')
-      ? 'public, max-age=31536000, immutable'
-      : file === INDEX
-        ? 'no-cache'
-        : 'public, max-age=3600';
+    // Vite fingerprints everything under /assets, so those never change. Every
+    // other file keeps its name when its contents change (photos, textures,
+    // the topic objects), so the browser must check back each time; an
+    // unchanged file costs only a 304.
+    const cacheControl = pathname.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache';
     await sendFile(req, res, file, stats, cacheControl);
     return;
   }
