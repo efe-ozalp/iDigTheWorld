@@ -13,8 +13,8 @@ import { MAX_TOPIC_DEPTH, type TopicCard } from '../shared/types.js';
  * Cards are cached by place and trail for as long as the server runs.
  */
 
-const MODEL_TIMEOUT_MS = 12_000;
-const MAX_ANSWER_TOKENS = 700;
+const MODEL_TIMEOUT_MS = 20_000;
+const MAX_ANSWER_TOKENS = 1100;
 const CACHE_LIMIT = 1000;
 
 const cache = new Map<string, TopicCard>();

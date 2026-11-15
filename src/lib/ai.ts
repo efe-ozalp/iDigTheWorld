@@ -1,4 +1,5 @@
 import type { CardRequest, Place, TopicCard } from '../../shared/types';
+import { groundingFor } from './grounding';
 import { sentences } from './wiki';
 
 /**
@@ -9,8 +10,9 @@ import { sentences } from './wiki';
 /** Either a written card, or the encyclopedia's own words when no card could be had. */
 export type CardResult = { kind: 'card'; card: TopicCard } | { kind: 'summary'; text: string };
 
-const TIMEOUT_MS = 16_000;
-const STORAGE_PREFIX = 'idig:card:v1:';
+const TIMEOUT_MS = 26_000;
+/** Bump the version when the cards' style changes, so old ones are not shown. */
+const STORAGE_PREFIX = 'idig:card:v2:';
 
 const memory = new Map<string, TopicCard>();
 const inFlight = new Map<string, Promise<CardResult>>();
@@ -75,19 +77,23 @@ export function getCard(place: Place, topicPath: readonly string[], grounding: s
 
   let pending = inFlight.get(key);
   if (!pending) {
-    const body: CardRequest = {
-      placeName: place.name,
-      country: place.country,
-      isOcean: place.isOcean,
-      topicPath: [...topicPath],
-      grounding,
-    };
-    pending = fetch('/api/card', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    })
+    // First gather reference text about this card's own subject, then ask for the card.
+    pending = groundingFor(place, topicPath, grounding)
+      .then((reference) => {
+        const body: CardRequest = {
+          placeName: place.name,
+          country: place.country,
+          isOcean: place.isOcean,
+          topicPath: [...topicPath],
+          grounding: reference,
+        };
+        return fetch('/api/card', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        });
+      })
       .then(async (res): Promise<CardResult> => {
         const data = res.ok ? ((await res.json()) as { card?: unknown }) : null;
         if (!data || !isCard(data.card)) return summaryOf(place, grounding);

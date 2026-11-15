@@ -14,7 +14,7 @@
  */
 
 /** Requests carry small JSON bodies; anything bigger is refused. */
-const MAX_BODY_BYTES = 64 * 1024;
+const MAX_BODY_BYTES = 64 * 1024; // a card request with its reference text is about 10 KB
 
 /**
  * @param {import('node:http').ServerResponse} res

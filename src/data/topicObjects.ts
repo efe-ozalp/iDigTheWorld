@@ -46,7 +46,7 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
     position: { left: '48%', top: '6%', width: '19vw' },
     tilt: -3,
     labelPosition: { right: '12%', bottom: '-3%' },
-    cardPosition: { left: '42%', top: '33%' },
+    cardPosition: { left: '36%', top: '31%' },
   },
   // Top right, under the two buttons.
   cuisine: {
@@ -56,7 +56,7 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
     position: { left: '78.5%', top: '13%', width: '12.5vw' },
     tilt: 6,
     labelPosition: { left: '-4%', bottom: '10%' },
-    cardPosition: { right: '23.5%', top: '31%' },
+    cardPosition: { right: '23.5%', top: '29%' },
   },
   // Middle of the right-hand side.
   history: {
@@ -66,7 +66,7 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
     position: { left: '79.5%', top: '48%', width: '15vw' },
     tilt: -5,
     labelPosition: { left: '6%', bottom: '-1%' },
-    cardPosition: { right: '22.5%', top: '36%' },
+    cardPosition: { right: '22.5%', top: '30%' },
   },
   // Lower centre right.
   culture: {
@@ -76,7 +76,7 @@ export const TOPIC_OBJECTS: Record<Topic, TopicObject> = {
     position: { left: '49%', bottom: '7%', width: '14vw' },
     tilt: 3,
     labelPosition: { right: '-12%', top: '26%' },
-    cardPosition: { left: '42%', bottom: '32%' },
+    cardPosition: { left: '36%', bottom: '32%' },
   },
 };
 

@@ -1341,10 +1341,10 @@ button {
   --tab: var(--ink);
   position: absolute;
   z-index: 5;
-  width: min(30rem, 35vw);
-  max-height: 62vh;
+  width: min(36rem, 41vw);
+  max-height: 66vh;
   overflow-y: auto;
-  padding: 1rem 1.2rem 1.1rem;
+  padding: 1.1rem 1.4rem 1.2rem;
   color: var(--ink);
   background: var(--cream);
   border-top: 6px solid var(--tab);
@@ -1423,14 +1423,24 @@ button {
 }
 
 .topic-plate__title {
-  margin-top: 0.15rem;
-  font-size: 1.5rem;
+  margin-top: 0.2rem;
+  font-size: 1.7rem;
   line-height: 1.2;
 }
 
 .topic-plate__hook {
-  margin-top: 0.35rem;
+  margin-top: 0.4rem;
+  font-size: 1.03rem;
   font-style: italic;
+}
+
+.topic-plate .facts {
+  margin-top: 0.7rem;
+  font-size: 1rem;
+}
+
+.topic-plate .facts li {
+  margin-top: 0.45rem;
 }
 
 .topic-plate__next {
