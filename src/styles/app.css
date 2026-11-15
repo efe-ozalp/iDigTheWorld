@@ -873,9 +873,7 @@ button {
   bottom: -1.5rem;
   left: var(--x);
   width: var(--size);
-  height: var(--size);
-  background: var(--bit);
-  border-radius: 42% 58% 47% 53% / 55% 45% 58% 42%;
+  background: var(--sprite) center / contain no-repeat;
   opacity: 0;
   animation: burst-fly 0.85s cubic-bezier(0.15, 0.7, 0.3, 1) var(--delay) both;
 }
@@ -888,42 +886,27 @@ button {
   12% {
     opacity: 1;
   }
+  70% {
+    opacity: 1;
+  }
   100% {
     opacity: 0;
     transform: translate(var(--drift), calc(-1 * var(--rise))) rotate(var(--spin));
   }
 }
 
+/* dirt.png is a whole spray of clods, 412 by 456. */
 .burst--dirt span {
-  --bit: #6b4a2a;
+  aspect-ratio: 412 / 456;
 }
 
-.burst--dirt span:nth-child(3n) {
-  --bit: #8f6f48;
-}
-
-.burst--dirt span:nth-child(4n) {
-  --bit: #3d2a17;
-}
-
+/* water.png is one small drop in the middle of a 1500 px square. The picture
+   is enlarged and shifted so that only the drop (50 by 57 px, starting at
+   724, 483) shows through each bit. The file itself is untouched. */
 .burst--water span {
-  --bit: #86c4ee;
-  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
-}
-
-.burst--water span:nth-child(3n) {
-  --bit: #e2f3ff;
-}
-
-.burst--water span:nth-child(4n) {
-  --bit: #4f9fd8;
-}
-
-/* Arrival: the same bits, played backwards so they settle, and fainter. */
-.burst--settle span {
-  animation-duration: 1.1s;
-  animation-direction: reverse;
-  filter: opacity(0.65);
+  aspect-ratio: 50 / 57;
+  background-position: 49.93% 33.47%;
+  background-size: 3000% auto;
 }
 
 /* Holds the photo and its scrims, and trims the photo's slow zoom at the edges. */

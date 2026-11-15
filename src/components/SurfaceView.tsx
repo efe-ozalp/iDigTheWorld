@@ -197,7 +197,7 @@ export default function SurfaceView({
 
       {isOrigin && !compact && <p className="surface__flick">Throw your cursor hard at the bottom edge to dig</p>}
       {leaving && <Burst kind={ground} />}
-      {emerging && <Burst kind={ground} settle />}
+      {emerging && <Burst kind={ground} />}
 
       {place && openTopic && (
         <TopicCards
