@@ -75,3 +75,18 @@ export interface GeocodeResult {
   /** English Wikipedia article title, when OpenStreetMap links one. */
   wikipediaTitle?: string;
 }
+
+/** How many cards deep a topic can be followed before it ends in bedrock. */
+export const MAX_TOPIC_DEPTH = 5;
+
+/** What the browser sends to POST /api/card. */
+export interface CardRequest {
+  placeName: string;
+  /** Empty for open water. */
+  country: string;
+  isOcean: boolean;
+  /** The trail so far, starting with one of TOPICS, ending with the card wanted. */
+  topicPath: string[];
+  /** Encyclopedia text about the place, which the card must stay consistent with. */
+  grounding: string;
+}
